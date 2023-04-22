@@ -1,0 +1,17 @@
+{
+	"nombre": "LAPSHOP Prime",
+	"descripcion": "API de Venta de Laptops Personalizadas",
+	"url": "lapshopp.com/api",
+	"precio": "free",
+	"endpoints": [
+		{
+			"url": "/laptops",
+			"limit": 10
+		},
+		{
+			"url": "/about/terms-of-use",
+			"limit": 10
+		}
+	]
+}
+
