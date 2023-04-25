@@ -31,9 +31,9 @@ def home():
 # decorator for verifying the JWT
 
 
-def token_required(f):
+def token_required(variable_f):
     """Funcion encargada de validar si un token es valido"""
-    @wraps(f)
+    @wraps(variable_f)
     def decorated(*args, **kwargs):
         token = None
         # jwt is passed in the request header
@@ -49,12 +49,12 @@ def token_required(f):
                 token, app.config['SECRET_KEY'], algorithms=['HS256'])
             cur = mysql.connection.cursor()
 
-            tPublicId = data['public_id']
+            t_public_id = data['public_id']
             sql = "select * from users where public_id = %s "
-            cur.execute(sql, [tPublicId])
-            currentUser = cur.fetchone()
+            cur.execute(sql, [t_public_id])
+            current_user = cur.fetchone()
 
-            if currentUser is None:
+            if current_user is None:
                 return jsonify({
                     'message': 'Token is invalid !!'
                 }), 401
@@ -63,7 +63,7 @@ def token_required(f):
                 'message': 'Token is invalid !!'
             }), 401
         # returns the current logged in users context to the routes
-        return f(currentUser, *args, **kwargs)
+        return f(current_user, *args, **kwargs)
 
     return decorated
 
@@ -73,19 +73,19 @@ def token_required(f):
 
 @app.route('/user', methods=['GET'])
 @token_required
-def get_all_users(current_user):
+def get_all_users():
     """Retorna todos los usuarios registrados en la base"""
     # querying the database
     # for all the entries in it
     cur = mysql.connection.cursor()
     cur.execute(""" select * from users""")
-    usersFetchAll = cur.fetchall()
+    users_fetch_all = cur.fetchall()
     # converting the query objects
     # to list of jsons
 
-    allUsers = []
-    for user in usersFetchAll:
-        allUsers.append({
+    all_users = []
+    for user in users_fetch_all:
+        all_users.append({
             "id": user[0],
             "public_id": user[1],
             "name": user[2],
@@ -93,7 +93,7 @@ def get_all_users(current_user):
             "password": user[4],
 
         })
-    return jsonify({'users': allUsers})
+    return jsonify({'users': all_users})
 
 
 # route for logging user in
@@ -115,9 +115,9 @@ def login():
     cur = mysql.connection.cursor()
     cur.execute("""select * from users where email=%s """,
                 (auth.get('email'),))
-    userF = cur.fetchone()
+    user_f = cur.fetchone()
 
-    if not userF:
+    if not user_f:
         # returns 401 if user does not exist
         return make_response(
             'Could not verify',
@@ -125,7 +125,7 @@ def login():
             {'WWW-Authenticate': 'Basic realm ="User does not exist !!"'}
         )
 
-    password = userF[4]
+    password = user_f[4]
 
     if check_password_hash(password, auth.get('password')):
         parsed_string = user_agent_parser.Parse(request.user_agent.string)
@@ -135,11 +135,11 @@ def login():
 
         # generates the JWT Token
         token = jwt.encode({
-            'public_id': userF[1],
+            'public_id': user_f[1],
             'exp': entry_time + timedelta(minutes=30)
         }, app.config['SECRET_KEY'])
 
-        return make_response(jsonify({'token': token, "public_id": userF[1], "user_browser": user_browser, "user_os": user_os, "entry_time": entry_time}), 201)
+        return make_response(jsonify({'token': token, "public_id": user_f[1], "user_browser": user_browser, "user_os": user_os, "entry_time": entry_time}), 201)
     # returns 403 if password is wrong
     return make_response(
         'Could not verify',
@@ -160,44 +160,40 @@ def signup():
     password = data.get('password')
 
     cur = mysql.connection.cursor()
-    querySql = "SELECT * FROM users WHERE email = %(email)s"
+    query_sql = "SELECT * FROM users WHERE email = %(email)s"
 
-    cur.execute(querySql,  {'email': "Ricardo@gmail.com"})
-    userF = cur.fetchone()
+    cur.execute(query_sql,  {'email': "Ricardo@gmail.com"})
+    user_f = cur.fetchone()
 
-    if userF == None:
+    if user_f is None:
         # database ORM object
-        tPublicId = str(uuid.uuid4())
-        tName = name
-        tEmail = email
-        tPassword = generate_password_hash(password)
-
-        print(tPassword)
+        t_public_id = str(uuid.uuid4())
+        t_name = name
+        t_mail = email
+        t_password = generate_password_hash(password)
 
         insert_stmt = (
             "INSERT INTO users (public_id, name, email, password) "
             "VALUES (%s, %s, %s, %s)"
         )
-        data = (tPublicId, tName, tEmail, tPassword)
+        data = (t_public_id, t_name, t_mail, t_password)
         cur = mysql.connection.cursor()
         cur.execute(insert_stmt, data)
         mysql.connection.commit()
-        print(userF)
+        print(user_f)
         return make_response('Successfully registered.', 201)
-    else:
-        # returns 202 if user already exists
-        return make_response('User already exists. Please Log in.', 202)
+    return make_response('User already exists. Please Log in.', 202)
 
 
 @app.route("/anime", methods=['GET'])
 @token_required
-def searchAnimeId(current_user):
+def search_anime_id():
     """Funcion que regresa todos los animes almacenados en la base"""
     try:
-        idAnime = int(request.args["anime-id"])
+        id_anime = int(request.args["anime-id"])
     except:
-        idAnime = False
-    if isinstance(idAnime, int):
+        id_anime = False
+    if isinstance(id_anime, int):
         cur = mysql.connection.cursor()
         cur.execute("""select A.id_anime as "Id",A.title as "Title",
                     A.description as "Description",A.year as "Year",
@@ -220,36 +216,35 @@ def searchAnimeId(current_user):
         inner join rated E
         ON D.rated = E.id_rated
  
-        WHERE A.id_anime = %s""", (idAnime,))
-        dataAnime = cur.fetchone()
-        if dataAnime is None:
+        WHERE A.id_anime = %s""", (id_anime,))
+        data_anime = cur.fetchone()
+        if data_anime is None:
             return jsonify({"error": "Anime not found"})
         anime = {
-            "id": dataAnime[0],
-            "title": dataAnime[1],
-            "description": dataAnime[2],
-            "year": dataAnime[3],
-            "mangaka": dataAnime[4],
-            "season": dataAnime[5],
-            "gender": dataAnime[6],
-            "rated": dataAnime[7],
-            "image": dataAnime[8],
+            "id": data_anime[0],
+            "title": data_anime[1],
+            "description": data_anime[2],
+            "year": data_anime[3],
+            "mangaka": data_anime[4],
+            "season": data_anime[5],
+            "gender": data_anime[6],
+            "rated": data_anime[7],
+            "image": data_anime[8],
 
         }
         return jsonify(anime)
-    else:
-        return jsonify({"error": "An error occurred"})
+    return jsonify({"error": "An error occurred"})
 
 
 @app.route("/anime/author/", methods=['GET'])
 @token_required
-def searchMangakaId(current_user):
+def search_manga_id():
     """Funcion que regresa todos los animes del id de un author dado"""
     try:
-        idAuthor = int(request.args["author-id"])
+        id_author = int(request.args["author-id"])
     except:
-        idAuthor = False
-    if isinstance(idAuthor, int):
+        id_author = False
+    if isinstance(id_author, int):
         cur = mysql.connection.cursor()
         cur.execute("""select A.id_anime as "Id",A.title as "Title",A.description as 
                     "Description",A.year as "Year",
@@ -274,29 +269,28 @@ def searchMangakaId(current_user):
  
         WHERE B.id_author = %s
         
-        """, (idAuthor,))
-        dataAnime = cur.fetchone()
-        if dataAnime is None:
+        """, (id_author,))
+        data_anime = cur.fetchone()
+        if data_anime is None:
             return jsonify({"error": "Anime not found"})
         anime = {
-            "id": dataAnime[0],
-            "title": dataAnime[1],
-            "description": dataAnime[2],
-            "year": dataAnime[3],
-            "mangaka": dataAnime[4],
-            "season": dataAnime[5],
-            "gender": dataAnime[6],
-            "rated": dataAnime[7],
-            "image": dataAnime[8],
+            "id": data_anime[0],
+            "title": data_anime[1],
+            "description": data_anime[2],
+            "year": data_anime[3],
+            "mangaka": data_anime[4],
+            "season": data_anime[5],
+            "gender": data_anime[6],
+            "rated": data_anime[7],
+            "image": data_anime[8],
         }
         return jsonify(anime)
-    else:
-        return jsonify({"error": "Ocurrió un error"})
+    return jsonify({"error": "Ocurrió un error"})
 
 
 @app.route("/search/anime/", methods=['GET'])
 @token_required
-def searchAnimeTitle(current_user):
+def search_anime_title():
     """Funcion que regresa todos los animes que coincidan con el titulo dado"""
     title = request.args["title"]
     if len(title) == 0:
@@ -325,10 +319,10 @@ def searchAnimeTitle(current_user):
             ON D.rated = E.id_rated
  
             WHERE A.title LIKE %s """, (title,))
-    allData = cur.fetchall()
-    allAnimes = []
-    for anime in allData:
-        allAnimes.append({
+    all_data = cur.fetchall()
+    all_animes = []
+    for anime in all_data:
+        all_animes.append({
             "id": anime[0],
             "title": anime[1],
             "description": anime[2],
@@ -339,12 +333,12 @@ def searchAnimeTitle(current_user):
             "rated": anime[7],
             "image": anime[8],
         })
-    return jsonify(allAnimes)
+    return jsonify(all_animes)
 
 
 @app.route("/anime/all", methods=["GET"])
 @token_required
-def allAnimes(current_user):
+def all_animes():
     """Funcion que regresa todos los animes almacenados en la api"""
     cur = mysql.connection.cursor()
     cur.execute("""select A.id_anime as "Id",A.title as "Title",A.description as 
@@ -369,10 +363,10 @@ def allAnimes(current_user):
     ON D.rated = E.id_rated
     
     ORDER BY A.id_anime ASC""")
-    allData = cur.fetchall()
-    allAnimes = []
-    for anime in allData:
-        allAnimes.append({
+    all_data = cur.fetchall()
+    all_animes = []
+    for anime in all_data:
+        all_animes.append({
             "id": anime[0],
             "title": anime[1],
             "description": anime[2],
@@ -383,23 +377,23 @@ def allAnimes(current_user):
             "rated": anime[7],
             "image": anime[8],
         })
-    return jsonify(allAnimes)
+    return jsonify(all_animes)
 
 
 @app.route("/author/all/", methods=["GET"])
 @token_required
-def allAuthors(current_user):
+def all_authors():
     """Funcion que regresa todos los autores registrados en la api"""
     cur = mysql.connection.cursor()
     cur.execute("""select * from authors order by authors.id_author asc""")
-    allData = cur.fetchall()
-    allAuthors = []
-    for author in allData:
-        allAuthors.append({
+    all_data = cur.fetchall()
+    all_authors = []
+    for author in all_data:
+        all_authors.append({
             "id_author": author[0],
             "name": author[1],
         })
-    return jsonify(allAuthors)
+    return jsonify(all_authors)
 
 
 @app.route("/about")
