@@ -1,9 +1,9 @@
 """Este programa es una API que consulta datos generales de videojuegos"""
 from datetime import datetime, timedelta
 from functools import wraps
+import uuid  # for public id
 from flask import Flask, request, jsonify, make_response
 from flask_sqlalchemy import SQLAlchemy
-import uuid  # for public id
 from werkzeug.security import generate_password_hash, check_password_hash
 # imports for PyJWT authentication
 import jwt
