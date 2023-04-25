@@ -1,11 +1,13 @@
+#Created by tparadyse
+#April, 2023  
+"""General imports for working in API"""
+from functools import wraps
+from datetime import datetime, timedelta
+import uuid # for public id
 from flask import Flask, request, jsonify, make_response, render_template, url_for, redirect
 from flask_sqlalchemy import SQLAlchemy
-import uuid # for public id
 from werkzeug.security import generate_password_hash, check_password_hash
-# imports for PyJWT authentication
-import jwt
-from datetime import datetime, timedelta
-from functools import wraps
+import jwt # imports for PyJWT authentication
 
 # creates Flask object
 app = Flask(__name__)
@@ -21,6 +23,11 @@ db = SQLAlchemy(app)
 
 # Database ORMs
 class User(db.Model):
+    """_summary_
+
+    Args:
+        db (_type_): Class to generate and create a user table
+    """
     id = db.Column(db.Integer, primary_key = True)
     user_id = db.Column(db.String(50), unique = True)
     name = db.Column(db.String(100))
@@ -29,12 +36,22 @@ class User(db.Model):
 
 # Tables ORMs for Graphics Cards Endpoints
 class Graphic_Card(db.Model):
+    """_summary_
+
+    Args:
+        db (_type_): Class to generate and create a graphics_cards table
+    """
     id = db.Column(db.Integer, primary_key = True)
     technologic_id = db.Column(db.Integer, unique = True)
     brand_id = db.Column(db.Integer, unique = True)
     model_id = db.Column(db.Integer, unique = True)
 
 class Technologic(db.Model):
+    """_summary_
+
+    Args:
+        db (_type_): Class to generate and create a technologic table
+    """
     id = db.Column(db.Integer, primary_key = True)
     technologic_id = db.Column(db.String(50), unique = True)
     name_technology = db.Column(db.Integer)
@@ -44,6 +61,11 @@ class Technologic(db.Model):
     main_branch = db.Column(db.String(80))
 
 class Brand(db.Model):
+    """_summary_
+
+    Args:
+        db (_type_): Class to generate and create a brand table
+    """
     id = db.Column(db.Integer, primary_key = True)
     brand_id = db.Column(db.String(50), unique = True)
     brand_name = db.Column(db.String(100))
@@ -56,6 +78,11 @@ class Brand(db.Model):
     range_reputation = db.Column(db.String(80))
 
 class Model(db.Model):
+    """_summary_
+
+    Args:
+        db (_type_): Class to generate and create a model table
+    """
     id = db.Column(db.Integer, primary_key = True)
     model_id = db.Column(db.String(50), unique = True)
     model_name = db.Column(db.String(80))
@@ -77,6 +104,11 @@ class Model(db.Model):
     unique_features = db.Column(db.String(80))
 
 class Logs(db.Model):
+    """_summary_
+
+    Args:
+        db (_type_): Class to generate and create a logs table
+    """
     id = db.Column(db.Integer, primary_key = True)
     user_id = db.Column(db.Integer, unique = True)
     endpoint = db.Column(db.String(80))
@@ -84,6 +116,11 @@ class Logs(db.Model):
     session_date = db.Column(db.String(80))
 
 class Session(db.Model):
+    """_summary_
+
+    Args:
+        db (_type_): Class to generate and create a session table
+    """
     id = db.Column(db.Integer, primary_key = True)
     user_id = db.Column(db.Integer, unique = True)
     session_date = db.Column(db.String(80))
@@ -95,6 +132,12 @@ class Session(db.Model):
 
 # decorator for verifying the JWT
 def token_required(f):
+    """_summary_
+
+    Args:
+        db (_type_): Function to create a validate token 
+        to be used before to start a endpoint page to authenticate
+    """
     @wraps(f)
     def decorated(*args, **kwargs):
         token = None
@@ -128,6 +171,11 @@ def token_required(f):
 @app.route('/user', methods =['GET'])
 @token_required
 def get_all_users(current_user):
+    """_summary_
+
+    Args:
+        db (_type_): Function to get all user of User table
+    """
     # querying the database
     # for all the entries in it
     users = User.query.all()
@@ -148,7 +196,11 @@ def get_all_users(current_user):
 # route for logging user in
 @app.route('/login', methods =['GET', 'POST'])
 def login():
+    """_summary_
 
+    Args:
+        db (_type_): Function to login before to start navigate
+    """
     # returns a login.html template 
     if request.method == 'GET':
         return render_template('auth/login.html')
@@ -194,7 +246,11 @@ def login():
 # signup route
 @app.route('/signup', methods =['POST'])
 def signup():
+    """_summary_
 
+    Args:
+        db (_type_): Function to signup or create a user account
+    """
 	# creates a dictionary of the form data
     data = request.form
 
@@ -230,6 +286,12 @@ def signup():
 @app.route('/graphics-cards', methods =['GET'])
 @token_required
 def get_all_graphics_cards(current_user):
+    """_summary_
+
+    Args:
+        db (_type_): Function to get all graphics cards from
+        graphics_cards table
+    """
     graphic = Graphic_Card.query.all()
     output = []
     for gc in graphic:
@@ -245,6 +307,11 @@ def get_all_graphics_cards(current_user):
 @app.route('/graphics-cards{model_id}', methods =['GET'])
 @token_required
 def get_graphic_card_model(current_user):
+    """_summary_
+
+    Args:
+        db (_type_): Function to get an specific graphic card from model table
+    """
     graphic = Model.query.all()
     output = []
     for gc in graphic:
@@ -266,4 +333,5 @@ if __name__ == "__main__":
 	# setting debug to True enables hot reload
 	# and also provides a debugger shell
 	# if you hit an error while running the server
-	app.run(debug = True)
+    app.run(debug = True)
+ 
