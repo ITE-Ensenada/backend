@@ -2,7 +2,7 @@
 import mysql.connector
 import json
 from mysql.connector import Error
-from flask import Flask, render_template, request, redirect, url_for, session, jsonify, make_response
+from flask import Flask, render_template, request, jsonify, make_response
 from flask_mysqldb import MySQL
 from werkzeug.security import generate_password_hash, check_password_hash
 import jwt
@@ -292,7 +292,7 @@ def search_anime_title():
         return jsonify({"error": "El titulo no puede estar vacio"})
     title = "%"+title+"%"
     cur = mysql.connection.cursor()
-    cur.execute("""select A.id_anime as "Id",A.title as 
+    cur.execute("""select A.id_anime as "Id",A.title as
             "Title",A.description as "Description",A.year as "Year",
             B.name as "Mangaka"
             ,C.season as "Season"
@@ -336,7 +336,7 @@ def search_anime_title():
 def all_animes():
     """Funcion que regresa todos los animes almacenados en la api"""
     cur = mysql.connection.cursor()
-    cur.execute("""select A.id_anime as "Id",A.title as "Title",A.description as 
+    cur.execute("""select A.id_anime as "Id",A.title as "Title",A.description as
     "Description",A.year as "Year",
     B.name as "Mangaka"
     ,C.season as "Season"
