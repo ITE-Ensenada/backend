@@ -1,13 +1,11 @@
+""" Este es el codigo de Cannapi, una API Rest sobre cannabis"""
 # Flask
 from flask import Flask, jsonify, request, make_response
 from flask_sqlalchemy import SQLAlchemy
-
 # JWT
 import jwt
-
 # SQLITE3
 import sqlite3
-
 # Otros
 from  werkzeug.security import generate_password_hash, check_password_hash
 import uuid
@@ -15,7 +13,6 @@ import json
 from datetime import datetime, timedelta
 from functools import wraps
 from user_agents import parse
-
 
 # Objeto de Flask
 app = Flask(__name__)
@@ -28,6 +25,7 @@ db = SQLAlchemy(app)
 
 # Database ORMs
 class User(db.Model):
+    """ORMs de la tabla Usuario"""
     user_id = db.Column(db.Integer, primary_key = True)
     user_public = db.Column(db.String(50), unique = True)
     user_name = db.Column(db.String(100))
@@ -36,11 +34,13 @@ class User(db.Model):
     user_registerdate = db.Column(db.String(80))
 
 class Log(db.Model):
+    """ORMs de la tabla log"""
     log_id = db.Column(db.Integer, primary_key = True)
     log_email = db.Column(db.String(70))
     log_date = db.Column(db.String(80))
 
 class Strain(db.Model):
+    """ORMs de la tabla Strain"""
     strain_id = db.Column(db.Integer, primary_key=True)
     strain_name = db.Column(db.String(255))
     strain_type = db.Column(db.String(255))
@@ -52,6 +52,7 @@ class Strain(db.Model):
     strain_flavors = db.Column(db.Text)
 
 class Creator(db.Model):
+    """ORMs de la tabla Creator"""
     creators_name = db.Column(db.String(255))
     creators_country = db.Column(db.String(255))
     creators_mail = db.Column(db.String(255))
@@ -61,6 +62,7 @@ class Creator(db.Model):
     creators_lab = db.Column(db.String(255))
 
 class Dispensary(db.Model):
+    """ORMs de la tabla Dispensary"""
     dispensary_name = db.Column(db.String(255))
     dispensary_state = db.Column(db.String(255))
     dispensary_city = db.Column(db.String(255))
@@ -69,6 +71,7 @@ class Dispensary(db.Model):
     dispensary_mail = db.Column(db.String(255), primary_key = True)
 
 class Award(db.Model):
+    """ORMs de la tabla Awards"""
     awards_id = db.Column(db.Integer, primary_key=True)
     awards_name = db.Column(db.String(255))
     awards_date = db.Column(db.Date)
@@ -76,6 +79,7 @@ class Award(db.Model):
     awards_winner = db.Column(db.String(255))
 
 class Concentrate(db.Model):
+    """ORMs de la tabla Concentrate"""
     concentrate_id = db.Column(db.Integer, primary_key=True)
     concentrate_name = db.Column(db.String(255))
     concentrate_strain = db.Column(db.String(255))
@@ -86,13 +90,12 @@ class Concentrate(db.Model):
     concentrate_effects = db.Column(db.Text)
     concentrate_flavors = db.Column(db.Text)
     concentrate_description = db.Column(db.Text)
-
-
 # with app.app_context():
 #     db.create_all()
 
 # Funcion para obtener los datos del usuario
 def get_user_info():
+    """ Funcion para obtener la informacion del usuario"""
     user_agent = request.headers.get('User-Agent')
     user_agent_parsed = parse(user_agent)
     user_os = user_agent_parsed.os.family
@@ -108,6 +111,10 @@ def get_user_info():
 
 # Verificardor del JWT
 def token_required(f):
+    """
+    Funcion que verifica el token dado en el header para hacer una
+    consulta en la API
+    """
     @wraps(f)
     def decorated(*args, **kwargs):
         token = None
@@ -117,7 +124,6 @@ def token_required(f):
         # Return 401 si no hay token en el header
         if not token:
             return jsonify({'message' : 'Token is missing !!'}), 401
-
         try:
             # decode del payload
             data = jwt.decode(token, app.config['SECRET_KEY'])
@@ -132,15 +138,16 @@ def token_required(f):
         return  f(current_user, *args, **kwargs)
     return decorated
 
-
 @app.route("/")
 def main():
-        return "<center><h1>CANNAPI CHAD API DEPLOY</h1></center><marquee>ADRIAN Y TONY</marquee>"
+    """ Funcion que despliega nuestra ruta main / """
+    return "<center><h1>CANNAPI CHAD API DEPLOY</h1></center>\
+    <marquee>ADRIAN Y TONY</marquee>"
 
 # Login
 @app.route('/login', methods=['POST'])
 def login():
-
+    """ Funcion para realizar el Login """
     # Obtiene la info del usuario del request
     auth = request.form
     if not auth or not auth.get('email') or not auth.get('password'):
@@ -160,7 +167,6 @@ def login():
             401,
             {'WWW-Authenticate' : 'Basic realm ="User does not exist !!"'}
         )
-
     if check_password_hash(user.user_password, auth.get('password')):
         user_info = get_user_info()
         token = jwt.encode({
@@ -171,12 +177,12 @@ def login():
         },
             app.config['SECRET_KEY'])
         return make_response(jsonify({'token' : token.decode('UTF-8')}), 201)
-    else:
-        return make_response('Unable to verify', 403, {'WWW-Authenticate': 'Basic realm: "Authentication Failed "'})
+    return make_response('Unable to verify', 403, {'WWW-Authenticate': 'Basic realm: "Authentication Failed "'})
 
 #Register
 @app.route('/register', methods = ['POST'])
 def register():
+    """ Ruta para el registro de un usario en nuestra API """
     data = request.form
     name, email = data.get('name'), data.get('email')
     password = data.get('password')
@@ -197,30 +203,27 @@ def register():
         db.session.add(log)
         db.session.commit()
         return make_response('Successfully registered.', 201)
-    else:
         # returns 202 if user already exists
-        return make_response('User already exists. Please Log in.', 202)
+    return make_response('User already exists. Please Log in.', 202)
 
 #Autheticated
 @app.route('/auth')
 @token_required
 def auth():
+    """ Ruta para verificar si el token funciona """
     return 'JWT is verified'
 
 @app.route("/about")
 def about():
+    """ Ruta que devuelve el JSON de la informacion de la API"""
     f = open('cannapi.json')
     display = json.load(f)
     return jsonify(display)
 
-
-@app.route("/bye")
-def bye():
-    return "<h1> Recuerden fumar bandita</h1>"
-
 @app.route('/api', methods=['GET'])
 @token_required
 def get_data():
+    """ Ruta que devuelve toda la informacion contenida en la API """
     strains = Strain.query.all()
     creators = Creator.query.all()
     dispensaries = Dispensary.query.all()
@@ -238,6 +241,7 @@ def get_data():
 @app.route("/awards", methods =['GET'])
 # @token_required
 def awards():
+    """ Ruta que devuelve los premios registrados """
     awards = Award.query.all()
     data = {
        'awards': [award.__dict__ for award in awards]
@@ -247,6 +251,7 @@ def awards():
 @app.route("/concentrate", methods=['GET'])
 @token_required
 def concentrate():
+    """ Ruta que devuelve los concentrados registrados """
     concentrates = Concentrate.query,all()
     data = {
         'concentrates': [concentrate.__dict__ for concentrate in concentrates]
@@ -256,6 +261,7 @@ def concentrate():
 @app.route("/creators", methods=['GET'])
 @token_required
 def creators():
+    """ Ruta que devuelve los creadores registrados """
     creators =  Creator.query.all()
     data = {
         'creators': [creator.__dict__ for creator in creators],
@@ -265,6 +271,7 @@ def creators():
 @app.route("/dispensary", methods=['GET'])
 @token_required
 def dispensary():
+    """ Ruta que devuelve los dispensarios registrados """
     dispensaries = Dispensary.query.all()
     data = {
         'dispensaries': [dispensary.__dict__ for dispensary in dispensaries]
@@ -274,6 +281,7 @@ def dispensary():
 @app.route("/strain", methods=['GET'])
 @token_required
 def strain():
+    """ Ruta que devuelve los strains registrados """
     strains = Strain.query.all()
     data = {
         'strains': [strain.__dict__ for strain in strains]

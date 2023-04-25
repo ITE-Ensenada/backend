@@ -52,6 +52,8 @@ El proyecto a continuacion se trata de una API REST sobre Cannabis Sativa, asi c
 # Metricas
 
 # Requerimientos 
+Python 3.10
+
 A continuacion instalar los archivos en requirements.txt
 
 > pip install -r requirements.txt
