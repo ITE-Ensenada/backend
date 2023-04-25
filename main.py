@@ -2,11 +2,11 @@
 import mysql.connector
 import json
 from mysql.connector import Error
-from flask import Flask, render_template, request, redirect, url_for, session, jsonify,make_response
+from flask import Flask, render_template, request, redirect, url_for, session, jsonify, make_response
 from flask_mysqldb import MySQL
-from  werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.security import generate_password_hash, check_password_hash
 import jwt
-import uuid # for public id
+import uuid  # for public id
 from datetime import datetime, timedelta
 from ua_parser import user_agent_parser
 from functools import wraps
@@ -22,7 +22,6 @@ app.config["SECRET_KEY"] = "EstaEsLaClaveSecreta853245"
 
 mysql = MySQL(app)
 
-formData = {}
 
 @app.route("/", methods=['GET', 'POST'])
 def home():
@@ -30,6 +29,8 @@ def home():
     return render_template("home.html")
 
 # decorator for verifying the JWT
+
+
 def token_required(f):
     """Funcion encargada de validar si un token es valido"""
     @wraps(f)
@@ -40,34 +41,37 @@ def token_required(f):
             token = request.headers['x-access-token']
         # return 401 if token is not passed
         if not token:
-            return jsonify({'message' : 'Token is missing !!'}), 401
+            return jsonify({'message': 'Token is missing !!'}), 401
 
         try:
             # decoding the payload to fetch the stored details
-            data = jwt.decode(token, app.config['SECRET_KEY'],algorithms=['HS256'])
+            data = jwt.decode(
+                token, app.config['SECRET_KEY'], algorithms=['HS256'])
             cur = mysql.connection.cursor()
 
             tPublicId = data['public_id']
-            sql="select * from users where public_id = %s ";
-            cur.execute(sql,[tPublicId])
+            sql = "select * from users where public_id = %s "
+            cur.execute(sql, [tPublicId])
             currentUser = cur.fetchone()
-            
+
             if currentUser is None:
                 return jsonify({
-                'message' : 'Token is invalid !!'
-            }), 401
+                    'message': 'Token is invalid !!'
+                }), 401
         except:
             return jsonify({
-                'message' : 'Token is invalid !!'
+                'message': 'Token is invalid !!'
             }), 401
         # returns the current logged in users context to the routes
-        return  f(currentUser, *args, **kwargs)
-  
+        return f(currentUser, *args, **kwargs)
+
     return decorated
-    
+
 # User Database Route
 # this route sends back list of users
-@app.route('/user', methods =['GET'])
+
+
+@app.route('/user', methods=['GET'])
 @token_required
 def get_all_users(current_user):
     """Retorna todos los usuarios registrados en la base"""
@@ -93,34 +97,34 @@ def get_all_users(current_user):
 
 
 # route for logging user in
-@app.route('/login', methods =['POST'])
+@app.route('/login', methods=['POST'])
 def login():
     """Funcion para poder hacer un login con email y password"""
     # creates dictionary of form data
     print(request.form.get("email"))
     auth = request.form
-    
+
     if not auth or not auth.get('email') or not auth.get('password'):
         # returns 401 if any email or / and password is missing
         return make_response(
             'Could not verify',
             401,
-            {'WWW-Authenticate' : 'Basic realm ="Login required !!"'}
+            {'WWW-Authenticate': 'Basic realm ="Login required !!"'}
         )
-  
-    
+
     cur = mysql.connection.cursor()
-    cur.execute("""select * from users where email=%s """, (auth.get('email'),))
+    cur.execute("""select * from users where email=%s """,
+                (auth.get('email'),))
     userF = cur.fetchone()
-  
+
     if not userF:
         # returns 401 if user does not exist
         return make_response(
             'Could not verify',
             403,
-            {'WWW-Authenticate' : 'Basic realm ="User does not exist !!"'}
+            {'WWW-Authenticate': 'Basic realm ="User does not exist !!"'}
         )
-    
+
     password = userF[4]
 
     if check_password_hash(password, auth.get('password')):
@@ -132,25 +136,25 @@ def login():
         # generates the JWT Token
         token = jwt.encode({
             'public_id': userF[1],
-            'exp' : entry_time + timedelta(minutes = 30)
+            'exp': entry_time + timedelta(minutes=30)
         }, app.config['SECRET_KEY'])
-  
-        return make_response(jsonify({'token' : token,"public_id": userF[1], "user_browser": user_browser, "user_os":user_os,"entry_time": entry_time }), 201)
+
+        return make_response(jsonify({'token': token, "public_id": userF[1], "user_browser": user_browser, "user_os": user_os, "entry_time": entry_time}), 201)
     # returns 403 if password is wrong
     return make_response(
         'Could not verify',
         403,
-        {'WWW-Authenticate' : 'Basic realm ="Wrong Password !!"'}
+        {'WWW-Authenticate': 'Basic realm ="Wrong Password !!"'}
     )
 
 
 # signup route
-@app.route('/signup', methods =['POST'])
+@app.route('/signup', methods=['POST'])
 def signup():
     """Funcion para hacer un registro con los campos: name, email y password"""
     # creates a dictionary of the form data
     data = request.form
-  
+
     # gets name, email and password
     name, email = data.get('name'), data.get('email')
     password = data.get('password')
@@ -158,12 +162,12 @@ def signup():
     cur = mysql.connection.cursor()
     querySql = "SELECT * FROM users WHERE email = %(email)s"
 
-    cur.execute(querySql,  { 'email': "Ricardo@gmail.com" })
+    cur.execute(querySql,  {'email': "Ricardo@gmail.com"})
     userF = cur.fetchone()
 
-    if  userF==None:
+    if userF == None:
         # database ORM object
-        tPublicId = str(uuid.uuid4());
+        tPublicId = str(uuid.uuid4())
         tName = name
         tEmail = email
         tPassword = generate_password_hash(password)
@@ -171,14 +175,14 @@ def signup():
         print(tPassword)
 
         insert_stmt = (
-        "INSERT INTO users (public_id, name, email, password) "
-        "VALUES (%s, %s, %s, %s)"
+            "INSERT INTO users (public_id, name, email, password) "
+            "VALUES (%s, %s, %s, %s)"
         )
         data = (tPublicId, tName, tEmail, tPassword)
         cur = mysql.connection.cursor()
         cur.execute(insert_stmt, data)
         mysql.connection.commit()
-        print(userF);
+        print(userF)
         return make_response('Successfully registered.', 201)
     else:
         # returns 202 if user already exists
@@ -414,8 +418,9 @@ def page_not_found(error):
     }
     return jsonify(error)
 
+
 if __name__ == "__main__":
     # setting debug to True enables hot reload
     # and also provides a debugger shell
     # if you hit an error while running the server
-    app.run(debug = True)
+    app.run(debug=True)
