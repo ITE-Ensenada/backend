@@ -2,15 +2,15 @@
 # source virtual/bin/active
 # flask --app app run -h ip
 
-
-from flask import Flask, jsonify, make_response, request
-from flask_sqlalchemy import SQLAlchemy
-import jwt
-from werkzeug.security import generate_password_hash, check_password_hash
+"""Importaciones generales para el proyecto"""
 import uuid
 import json
 from datetime import datetime, timedelta
 from functools import wraps
+import jwt
+from flask import Flask, jsonify, make_response, request
+from flask_sqlalchemy import SQLAlchemy
+from werkzeug.security import generate_password_hash, check_password_hash
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'Eso_Tilin'
@@ -22,6 +22,7 @@ db = SQLAlchemy(app)
 
 
 class Users(db.Model):
+    """Modelo para los usuarios registrados"""
     id = db.Column(db.Integer, primary_key=True, nullable=False)
     public_id = db.Column(db.String(50), unique=True, nullable=False)
     name = db.Column(db.String(100), nullable=False)
@@ -30,6 +31,7 @@ class Users(db.Model):
 
 
 class Authors(db.Model):
+    """Modelo para los autores de las canciones"""
     id = db.Column(db.Integer, primary_key=True)
     artistic_name = db.Column(db.String(50))
     nationality = db.Column(db.String(50), nullable=False)
@@ -38,6 +40,7 @@ class Authors(db.Model):
 
 
 class Artists(db.Model):
+    """Modelo para los artistas de las canciones"""
     id = db.Column(db.Integer, primary_key=True)
     artistic_name = db.Column(db.String(50))
     nationality = db.Column(db.String(50), nullable=False)
@@ -46,6 +49,7 @@ class Artists(db.Model):
 
 
 class Songs(db.Model):
+    """Modelo para las canciones"""
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(50), nullable=False)
     genre = db.Column(db.String(30), nullable=False)
@@ -63,12 +67,13 @@ class Songs(db.Model):
                           nullable=False)
 
 
-with app.app_context():
-    db.create_all()
+# with app.app_context():
+#     db.create_all()
 
 
-def token_required(f):
-    @wraps(f)
+def token_required(func):
+    """Función para validación de tokens"""
+    @wraps(func)
     def decorated(*args, **kwargs):
         token = None
         if 'x-access-token' in request.headers:
@@ -85,14 +90,15 @@ def token_required(f):
             return jsonify({
                 'message': 'Invalid token.'
             }), 401
-        return f(current_user, *args, **kwargs)
+        return func(current_user, *args, **kwargs)
 
     return decorated
 
 
 @app.route('/user', methods=['GET'])
 @token_required
-def get_all_users(current_user):
+def get_all_users():
+    """Endpoint para obtener todos los usuarios registrados"""
     users = Users.query.all()
     output = []
     for user in users:
@@ -107,11 +113,13 @@ def get_all_users(current_user):
 
 @app.route("/")
 def main():
+    """Endpoint para endpoint principal"""
     return "<h1 style= text-align: center;>All Music</h1>"
 
 
 @app.route("/login", methods=['POST'])
 def login():
+    """Endpoint para generar un token de inicio de sesión"""
     auth = request.form
 
     if not auth or not auth.get('email') or not auth.get('password'):
@@ -146,6 +154,7 @@ def login():
 
 @app.route('/signup', methods=['POST'])
 def signup():
+    """Endpoint para registrar un usuario"""
     data = request.form
 
     name, email = data.get('name'), data.get('email')
@@ -163,13 +172,14 @@ def signup():
         db.session.commit()
 
         return make_response('Successfully registered.', 201)
-    else:
-        return make_response('User already exists. Please Log in.', 202)
+
+    return make_response('User already exists. Please Log in.', 202)
 
 
 @app.route("/author")
 @token_required
-def get_authors(current_user):
+def get_authors():
+    """Endpoint para obtener todos los autores"""
     authors = Authors.query.all()
     output = []
     for author in authors:
@@ -184,7 +194,8 @@ def get_authors(current_user):
 
 @app.route("/artist")
 @token_required
-def get_artists(current_user):
+def get_artists():
+    """Endpoint para obtener todos los artistas"""
     artists = Artists.query.all()
     output = []
     for artist in artists:
@@ -199,7 +210,8 @@ def get_artists(current_user):
 
 @app.route("/song")
 @token_required
-def get_songs(current_user):
+def get_songs():
+    """Endpoint para obtener todas las canciones"""
     songs = Songs.query.all()
     output = []
     for song in songs:
@@ -221,14 +233,15 @@ def get_songs(current_user):
 
 @app.route("/about")
 def about():
-    f = open('allmusic.json')
-    data = json.load(f)
-    f.close()
+    """Endpoint para obtener la información del proyecto"""
+    with open('allmusic.json', encoding="utf-8") as file:
+        data = json.load(file)
     return data
 
 
 @app.errorhandler(404)
-def page_not_found(error):
+def page_not_found():
+    """Manejador de errores de ruta"""
     return jsonify({'error': "Page not found."}), 404
 
 
