@@ -103,10 +103,11 @@ def signup():
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     """
-    Maneja la autenticación de un usuario a través de credenciales de inicio
-    de sesión proporcionadas a través de una solicitud POST. Si las credenciales 
-    son válidas, se crea un token de acceso para el usuario y se registra una nueva 
-    sesión en la base de datos. Si las credenciales son inválidas, se devuelve un mensaje de error.
+    Maneja la autenticación de un usuario a través de credenciales
+    de inicio de sesión proporcionadas a través de una solicitud POST.
+    Si las credenciales son válidas, se crea un token de acceso para 
+    el usuario y se registra una nueva sesión en la base de datos. 
+    Si las credenciales son inválidas, se devuelve un mensaje de error.
     """
     if request.method == 'POST':
         username = request.form['username']
@@ -280,13 +281,17 @@ def get_mexicanos():
 
 @app.route("/bye")
 def adios():
-    """ Manda un mensaje en formato JSON con una despedida. """
+    """
+    Manda un mensaje en formato JSON con una despedida.
+    """
     return jsonify(despedida="bye bye")
 
 
 @app.route("/about")
 def about():
-    """ Abre el archivo de liga.json devolviendo una lista de los endpoints de la Liga MX. """
+    """ 
+    Abre el archivo de liga.json devolviendo una lista de los endpoints de la Liga MX.
+    """
     with open("liga.json", encoding='utf-8') as archivo:
         datos = json.load(archivo)
     return datos
