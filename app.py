@@ -1,6 +1,9 @@
 #Created by tparadyse
-#April, 2023  
-"""General imports for working in API"""
+#April, 2023
+
+"""
+General imports for working in API
+"""
 from functools import wraps
 from datetime import datetime, timedelta
 import uuid # for public id
@@ -22,11 +25,10 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
 db = SQLAlchemy(app)
 
 # Database ORMs
+# pylint: disable=R0903
 class User(db.Model):
-    """_summary_
-
-    Args:
-        db (_type_): Class to generate and create a user table
+    """
+    Class to generate and create a user table
     """
     id = db.Column(db.Integer, primary_key = True)
     user_id = db.Column(db.String(50), unique = True)
@@ -35,22 +37,20 @@ class User(db.Model):
     password = db.Column(db.String(80))
 
 # Tables ORMs for Graphics Cards Endpoints
-class Graphic_Card(db.Model):
-    """_summary_
-
-    Args:
-        db (_type_): Class to generate and create a graphics_cards table
+# pylint: disable=R0903
+class GraphicCard(db.Model):
+    """
+    Class to generate and create a graphics_cards table
     """
     id = db.Column(db.Integer, primary_key = True)
     technologic_id = db.Column(db.Integer, unique = True)
     brand_id = db.Column(db.Integer, unique = True)
     model_id = db.Column(db.Integer, unique = True)
 
+# pylint: disable=R0903
 class Technologic(db.Model):
-    """_summary_
-
-    Args:
-        db (_type_): Class to generate and create a technologic table
+    """
+    Class to generate and create a technologic table
     """
     id = db.Column(db.Integer, primary_key = True)
     technologic_id = db.Column(db.String(50), unique = True)
@@ -60,11 +60,10 @@ class Technologic(db.Model):
     origin_country = db.Column(db.String(80))
     main_branch = db.Column(db.String(80))
 
+# pylint: disable=R0903
 class Brand(db.Model):
-    """_summary_
-
-    Args:
-        db (_type_): Class to generate and create a brand table
+    """
+    Class to generate and create a brand table
     """
     id = db.Column(db.Integer, primary_key = True)
     brand_id = db.Column(db.String(50), unique = True)
@@ -77,11 +76,10 @@ class Brand(db.Model):
     range_prices = db.Column(db.String(80))
     range_reputation = db.Column(db.String(80))
 
+# pylint: disable=R0903
 class Model(db.Model):
-    """_summary_
-
-    Args:
-        db (_type_): Class to generate and create a model table
+    """
+    Class to generate and create a model table
     """
     id = db.Column(db.Integer, primary_key = True)
     model_id = db.Column(db.String(50), unique = True)
@@ -103,11 +101,10 @@ class Model(db.Model):
     model_price = db.Column(db.Integer)
     unique_features = db.Column(db.String(80))
 
+# pylint: disable=R0903
 class Logs(db.Model):
-    """_summary_
-
-    Args:
-        db (_type_): Class to generate and create a logs table
+    """
+    Class to generate and create a logs table
     """
     id = db.Column(db.Integer, primary_key = True)
     user_id = db.Column(db.Integer, unique = True)
@@ -115,11 +112,10 @@ class Logs(db.Model):
     register_date = db.Column(db.String(80))
     session_date = db.Column(db.String(80))
 
+# pylint: disable=R0903
 class Session(db.Model):
-    """_summary_
-
-    Args:
-        db (_type_): Class to generate and create a session table
+    """
+    Class to generate and create a session table
     """
     id = db.Column(db.Integer, primary_key = True)
     user_id = db.Column(db.Integer, unique = True)
@@ -128,17 +124,15 @@ class Session(db.Model):
     operative_system = db.Column(db.String(80))
 
 #with app.app_context():
-#  db.create_all()
+    #db.create_all()
 
 # decorator for verifying the JWT
-def token_required(f):
-    """_summary_
-
-    Args:
-        db (_type_): Function to create a validate token 
-        to be used before to start a endpoint page to authenticate
+def token_required(func):
     """
-    @wraps(f)
+    Function to create a validate token to be used before 
+    to start a endpoint page to authenticate
+    """
+    @wraps(func)
     def decorated(*args, **kwargs):
         token = None
         # jwt is passed in the request header
@@ -157,12 +151,12 @@ def token_required(f):
             current_user = User.query\
 				.filter_by(user_id = data['user_id'])\
 				.first()
-        except:
+        except jwt.exceptions.DecodeError:
             return jsonify({
 				'message' : 'Token is invalid !!'
 			}), 401
 		# returns the current logged in users context to the routes
-        return f(current_user, *args, **kwargs)
+        return func(current_user, *args, **kwargs)
 
     return decorated
 
@@ -171,10 +165,8 @@ def token_required(f):
 @app.route('/user', methods =['GET'])
 @token_required
 def get_all_users(current_user):
-    """_summary_
-
-    Args:
-        db (_type_): Function to get all user of User table
+    """
+    Function to get all user of User table
     """
     # querying the database
     # for all the entries in it
@@ -196,12 +188,10 @@ def get_all_users(current_user):
 # route for logging user in
 @app.route('/login', methods =['GET', 'POST'])
 def login():
-    """_summary_
-
-    Args:
-        db (_type_): Function to login before to start navigate
     """
-    # returns a login.html template 
+    Function to login before to start navigate
+    """
+    # returns a login.html template
     if request.method == 'GET':
         return render_template('auth/login.html')
 
@@ -246,10 +236,8 @@ def login():
 # signup route
 @app.route('/signup', methods =['POST'])
 def signup():
-    """_summary_
-
-    Args:
-        db (_type_): Function to signup or create a user account
+    """
+    Function to signup or create a user account
     """
 	# creates a dictionary of the form data
     data = request.form
@@ -275,9 +263,9 @@ def signup():
         db.session.commit()
 
         return make_response('Successfully registered.', 201)
-    else:
-		# returns 202 if user already exists
-        return make_response('User already exists. Please Log in.', 202)
+
+	# returns 202 if user already exists
+    return make_response('User already exists. Please Log in.', 202)
 
 
 # Endpoints for Graphics Cards API
@@ -286,19 +274,16 @@ def signup():
 @app.route('/graphics-cards', methods =['GET'])
 @token_required
 def get_all_graphics_cards(current_user):
-    """_summary_
-
-    Args:
-        db (_type_): Function to get all graphics cards from
-        graphics_cards table
     """
-    graphic = Graphic_Card.query.all()
+    Function to get all graphics cards from graphics_cards table
+    """
+    graphic = GraphicCard.query.all()
     output = []
-    for gc in graphic:
+    for graphic_card in graphic:
         output.append({
-			'technologic_id': gc.technologic_id,
-			'brand_id' : gc.brand_id,
-			'model_id' : gc.model_id
+			'technologic_id': graphic_card.technologic_id,
+			'brand_id' : graphic_card.brand_id,
+			'model_id' : graphic_card.model_id
 		})
 
     return jsonify({'graphic': output})
@@ -307,26 +292,27 @@ def get_all_graphics_cards(current_user):
 @app.route('/graphics-cards{model_id}', methods =['GET'])
 @token_required
 def get_graphic_card_model(current_user):
-    """_summary_
-
-    Args:
-        db (_type_): Function to get an specific graphic card from model table
+    """
+    Function to get an specific graphic card from model table
     """
     graphic = Model.query.all()
     output = []
-    for gc in graphic:
+    for graphic_card in graphic:
         output.append({
-			'model_name': gc.model_name,
-			'model_number' : gc.model_number,
-			'generation_series' : gc.generation_series,
-            'memomy_vdedicate' : gc.memory_vdedicate,
-            'memory_vtype' : gc.memory_vtype
+			'model_name': graphic_card.model_name,
+			'model_number' : graphic_card.model_number,
+			'generation_series' : graphic_card.generation_series,
+            'memomy_vdedicate' : graphic_card.memory_vdedicate,
+            'memory_vtype' : graphic_card.memory_vtype
 		})
 
     return jsonify({'graphic': output})
 
 @app.route('/')
 def index():
+    """
+    This function redirect the / route to /login route
+    """
     return redirect(url_for('login'))
 
 if __name__ == "__main__":
