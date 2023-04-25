@@ -189,7 +189,8 @@ def searchAnimeId(current_user):
         idAnime = False
     if isinstance(idAnime, int):
         cur = mysql.connection.cursor()
-        cur.execute("""select A.id_anime as "Id",A.title as "Title",A.description as "Description",A.year as "Year",
+        cur.execute("""select A.id_anime as "Id",A.title as "Title",
+                    A.description as "Description",A.year as "Year",
         B.name as "Mangaka"
         ,C.season as "Season"
         ,D.name as "Gender"
@@ -239,7 +240,8 @@ def searchMangakaId(current_user):
         idAuthor = False
     if isinstance(idAuthor, int):
         cur = mysql.connection.cursor()
-        cur.execute("""select A.id_anime as "Id",A.title as "Title",A.description as "Description",A.year as "Year",
+        cur.execute("""select A.id_anime as "Id",A.title as "Title",A.description as 
+                    "Description",A.year as "Year",
         B.name as "Mangaka"
         ,C.season as "Season"
         ,D.name as "Gender"
@@ -289,7 +291,8 @@ def searchAnimeTitle(current_user):
         return jsonify({"error": "El titulo no puede estar vacio"})
     title = "%"+title+"%"
     cur = mysql.connection.cursor()
-    cur.execute("""select A.id_anime as "Id",A.title as "Title",A.description as "Description",A.year as "Year",
+    cur.execute("""select A.id_anime as "Id",A.title as 
+                "Title",A.description as "Description",A.year as "Year",
             B.name as "Mangaka"
             ,C.season as "Season"
             ,D.name as "Gender"
@@ -331,7 +334,8 @@ def searchAnimeTitle(current_user):
 @token_required
 def allAnimes(current_user):
     cur = mysql.connection.cursor()
-    cur.execute("""select A.id_anime as "Id",A.title as "Title",A.description as "Description",A.year as "Year",
+    cur.execute("""select A.id_anime as "Id",A.title as "Title",A.description as 
+                "Description",A.year as "Year",
     B.name as "Mangaka"
     ,C.season as "Season"
     ,D.name as "Gender"
