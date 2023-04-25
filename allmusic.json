@@ -1,0 +1,36 @@
+{
+    "nombre":"All Music",
+    "descripcion": "All music es un catalogo web el cual permitirá al usuario realizar todo tipo de búsqueda de información referente a la música.",
+    "url":["AllMusic.com"],
+    "precio":"free",
+    "endpoints":[
+        {
+            "url":"/song",
+            "method": "GET",
+            "limit":6
+        },
+        {
+            "url":"/singer",
+            "method": "GET",
+            "limit":6
+        },
+        {
+            "url":"/author",
+            "method": "GET",
+            "limit":6
+        },
+        {
+            "url":"/about",
+            "method": "GET",
+            "limit":6
+        },
+        {
+            "url":"/login",
+            "method": "POST"
+        },
+        {
+            "url":"/signup",
+            "method": "POST"
+        }
+    ]
+}
