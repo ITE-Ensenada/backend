@@ -63,7 +63,7 @@ def token_required(variable_f):
                 'message': 'Token is invalid !!'
             }), 401
         # returns the current logged in users context to the routes
-        return f(current_user, *args, **kwargs)
+        return variable_f(current_user, *args, **kwargs)
 
     return decorated
 
