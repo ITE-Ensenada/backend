@@ -1,0 +1,52 @@
+{
+    "name":"Liga DBMX",
+    "description": "Una API donde consultar todas las estadisticas relacionadas con la magica Liga MX",
+    "url":"http://127.0.0.1:5000/",
+    "precio":"free 4 all",
+    "endpoints":[
+        {
+            "url":"/signup",
+            "count":1
+        },
+        {
+            "url":"/login",
+            "count":1
+        },
+        {
+            "url":"/ligamx/equipos",
+            "count":18
+        },
+        {
+            "url":"/ligamx/jugadores",
+            "count":20 
+        },
+        {
+            "url":"/ligamx/campeonatos",
+            "count":18
+        },
+        {
+            "url":"/ligamx/goleadores",
+            "count":10
+        },
+        {
+            "url":"/ligamx/asistidores",
+            "count":10
+        },
+        {
+            "url":"/ligamx/jugadores/valorMercado",
+            "count":100
+        },
+        {
+            "url":"/ligamx/jugadores/mexicanos",
+            "count":100
+        },
+        {
+            "url":"/about",
+            "count":1 
+        },
+        {
+            "url":"/bye",
+            "count":1 
+        }
+    ]
+}

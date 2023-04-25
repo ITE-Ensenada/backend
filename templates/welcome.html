@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>LIGA DBMX</title>
+    <style>
+      body {
+        background-color: #f7d08a;
+      }
+      h1 {
+        text-align: center;
+        font-size: 4rem;
+        color: #ffffff;
+        animation: move 8s linear infinite;
+      }
+
+      @keyframes move {
+        0% {
+          transform: translateX(-100%);
+        }
+        100% {
+          transform: translateX(100%);
+        }
+      }
+      ul {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        text-align: center;
+      }
+      li {
+        display: inline-block;
+        margin: 20px;
+      }
+      a {
+        display: block;
+        background-color: #d65a31;
+        color: #ffffff;
+        font-size: 1.5rem;
+        padding: 10px 20px;
+        border-radius: 5px;
+        text-decoration: none;
+        transition: all 0.2s ease-in-out;
+      }
+      a:hover {
+        background-color: #f28c66;
+        transform: scale(1.1);
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Hola Pamboleros</h1>
+    <ul>
+      <li><a href="/signup">Registrarse</a></li>
+      <li><a href="/login">Iniciar sesión</a></li>
+    </ul>
+  </body>
+</html>
