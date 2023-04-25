@@ -43,25 +43,21 @@ def token_required(variable_f):
         if not token:
             return jsonify({'message': 'Token is missing !!'}), 401
 
-        try:
-            # decoding the payload to fetch the stored details
-            data = jwt.decode(
-                token, app.config['SECRET_KEY'], algorithms=['HS256'])
-            cur = mysql.connection.cursor()
+        # decoding the payload to fetch the stored details
+        data = jwt.decode(
+            token, app.config['SECRET_KEY'], algorithms=['HS256'])
+        cur = mysql.connection.cursor()
 
-            t_public_id = data['public_id']
-            sql = "select * from users where public_id = %s "
-            cur.execute(sql, [t_public_id])
-            current_user = cur.fetchone()
+        t_public_id = data['public_id']
+        sql = "select * from users where public_id = %s "
+        cur.execute(sql, [t_public_id])
+        current_user = cur.fetchone()
 
-            if current_user is None:
-                return jsonify({
-                    'message': 'Token is invalid !!'
-                }), 401
-        except:
+        if current_user is None:
             return jsonify({
                 'message': 'Token is invalid !!'
             }), 401
+
         # returns the current logged in users context to the routes
         return variable_f(current_user, *args, **kwargs)
 
@@ -189,10 +185,9 @@ def signup():
 @token_required
 def search_anime_id():
     """Funcion que regresa todos los animes almacenados en la base"""
-    try:
-        id_anime = int(request.args["anime-id"])
-    except:
-        id_anime = False
+
+    id_anime = int(request.args["anime-id"])
+
     if isinstance(id_anime, int):
         cur = mysql.connection.cursor()
         cur.execute("""select A.id_anime as "Id",A.title as "Title",
@@ -240,14 +235,12 @@ def search_anime_id():
 @token_required
 def search_manga_id():
     """Funcion que regresa todos los animes del id de un author dado"""
-    try:
-        id_author = int(request.args["author-id"])
-    except:
-        id_author = False
+    id_author = int(request.args["author-id"])
     if isinstance(id_author, int):
         cur = mysql.connection.cursor()
-        cur.execute("""select A.id_anime as "Id",A.title as "Title",A.description as 
-                    "Description",A.year as "Year",
+        cur.execute("""select A.id_anime as "Id",A.title as
+        "Title",A.description as 
+        "Description",A.year as "Year",
         B.name as "Mangaka"
         ,C.season as "Season"
         ,D.name as "Gender"
@@ -298,7 +291,7 @@ def search_anime_title():
     title = "%"+title+"%"
     cur = mysql.connection.cursor()
     cur.execute("""select A.id_anime as "Id",A.title as 
-                "Title",A.description as "Description",A.year as "Year",
+            "Title",A.description as "Description",A.year as "Year",
             B.name as "Mangaka"
             ,C.season as "Season"
             ,D.name as "Gender"
@@ -342,7 +335,7 @@ def all_animes():
     """Funcion que regresa todos los animes almacenados en la api"""
     cur = mysql.connection.cursor()
     cur.execute("""select A.id_anime as "Id",A.title as "Title",A.description as 
-                "Description",A.year as "Year",
+    "Description",A.year as "Year",
     B.name as "Mangaka"
     ,C.season as "Season"
     ,D.name as "Gender"
@@ -399,7 +392,7 @@ def all_authors():
 @app.route("/about")
 def anime():
     """Funcion que muestra informacion sobre como usar la api y endpoins disponibles"""
-    with open("aboutl.json", "r") as data:
+    with open("aboutl.json", "r", encoding="utf-8") as data:
         return jsonify(json.load(data))
 
 
