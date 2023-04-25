@@ -135,7 +135,9 @@ def login():
             'exp': entry_time + timedelta(minutes=30)
         }, app.config['SECRET_KEY'])
 
-        return make_response(jsonify({'token': token, "public_id": user_f[1], "user_browser": user_browser, "user_os": user_os, "entry_time": entry_time}), 201)
+        return make_response(jsonify({'token': token, "public_id": user_f[1],
+                                      "user_browser": user_browser, "user_os": user_os,
+                                      "entry_time": entry_time}), 201)
     # returns 403 if password is wrong
     return make_response(
         'Could not verify',
