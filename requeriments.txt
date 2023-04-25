@@ -1,0 +1,4 @@
+python 3.10
+Flask 0.3.8
+PjJwt 1.7.1
+
