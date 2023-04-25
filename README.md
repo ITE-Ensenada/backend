@@ -72,15 +72,15 @@ Aqui van las instrucciones para ejecutar este proyecto
 
 Tener instalado python 3.10.0.
 
-A continuacion instalar los archivos en requirments.txt
-
-> pip install -r requirements.txt
-> pip install mysql-connector
-
 De preferencia esto debe estar en un VENV
 
 > python -m venv venv
 > venv\Scripts\activate
+
+A continuacion instalar los archivos en requirments.txt
+
+> pip install -r requirements.txt
+> pip install mysql-connector
 
 El proyecto esta realizado en flask se debe ejecutar con el siguiente comando:
 
