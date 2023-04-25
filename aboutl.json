@@ -1,0 +1,43 @@
+{
+  "title": "AnimeInfo",
+  "about": "AnimeInfo es una API para la consulta de informacion de Anime",
+  "url": "animeinfo.com/api",
+  "price": "Free",
+  "authors": ["Cesar del Angel, Zack Vadhir"],
+  "endpoints": [
+    {
+      "url": "/anime/all",
+      "count": "many",
+      "type": "GET"
+    },
+    {
+      "url": "/anime?{anime-id: int}",
+      "count": 1,
+      "type": "GET"
+    },
+    
+    {
+      "url": "/author/all",
+      "count": "many",
+      "type": "GET"
+    },
+
+    {
+      "url": "/anime/author?{author-id: int}",
+      "count": "many",
+      "type": "GET"
+    },
+
+    {
+      "url": "/search/anime?{title: String}",
+      "count": "many",
+      "type": "GET"
+    },
+
+    {
+      "url": "/about",
+      "count": 1,
+      "type": "GET"
+    }
+  ]
+}
