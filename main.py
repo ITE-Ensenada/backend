@@ -27,7 +27,7 @@ formData = {}
 @app.route("/", methods=['GET', 'POST'])
 def home():
     """Retorna un template dedicado al inicio de sesion"""
-        return render_template("home.html")
+    return render_template("home.html")
 
 # decorator for verifying the JWT
 def token_required(f):
