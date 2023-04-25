@@ -1,0 +1,6 @@
+
+# Sirve para cambiar la ruta que buscara el flask donde se almancenan los archivos de templates
+
+app = Flask(__name__, template_folder='mi_carpeta_de_templates')
+
+#

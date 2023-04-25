@@ -1,0 +1,16 @@
+{
+    "Name": "Juan",
+    "Description": "Aqui podras consultar las graficas que nunca podras comprar:,)",
+    "url": "http//:SUG.api",
+    "precio": ["un organo, o +< 700dlls"],
+    "endpoints": [
+        {
+            "url": "/NVIDEA",
+            "list_limit": 10
+        },
+        {
+            "url": "/AMD",
+            "list_limit": 10
+        }
+    ]
+}
