@@ -1,19 +1,26 @@
-<!DOCTYPE html>
-<html>
+<h1 class="mb-5" id="title">Login
+    <hr>
+</h1>
+<form action="{{ url_for('loginUser') }}" method="POST" autocomplete="off">
+    <div class="mb-6">
+        <label for="email" class="form-label">Email</label>
+        <input type="email" name="email" id="email" class="form-control" required="true">
+    </div>
+    <div class="mb-6">
+        <label for="password" class="form-label mt-4">Password</label>
+        <input type="password" name="password" class="form-control" required="true">
+    </div>
 
-<head>
-    <title>Iniciar sesión</title>
-</head>
+    <div class="d-grid gap-2 mt-3 mb-3">
+        <button type="submit" class="btn btn-primary btn-send">Entrar Ahora!</button>
+    </div>
 
-<body>
-    <h1>Iniciar sesión</h1>
-    <form method="POST" action="login">
-        <label for="username">Nombre de usuario:</label>
-        <input type="text" name="username" id="username"><br><br>
-        <label for="password">Contraseña:</label>
-        <input type="password" name="password" id="password"><br><br>
-        <input type="submit" value="Iniciar sesión">
-    </form>
-</body>
-
-</html>
+    <!--   <div class="mb-12">
+        <span>
+            No tienes Cuenta?
+        </span>
+        <a href="#" id="link_sign_up" class="createUser">
+            Crear cuenta
+        </a>
+    </div>-->
+</form>
