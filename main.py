@@ -26,6 +26,7 @@ formData = {}
 
 @app.route("/", methods=['GET', 'POST'])
 def home():
+    """Retorna un template dedicado al inicio de sesion"""
         return render_template("home.html")
 
 # decorator for verifying the JWT
@@ -68,6 +69,7 @@ def token_required(f):
 @app.route('/user', methods =['GET'])
 @token_required
 def get_all_users(current_user):
+    """Retorna todos los usuarios registrados en la base"""
     # querying the database
     # for all the entries in it
     cur = mysql.connection.cursor()
@@ -92,6 +94,7 @@ def get_all_users(current_user):
 # route for logging user in
 @app.route('/login', methods =['POST'])
 def login():
+    """Funcion para poder hacer un login con email y password"""
     # creates dictionary of form data
     print(request.form.get("email"))
     auth = request.form
@@ -143,6 +146,7 @@ def login():
 # signup route
 @app.route('/signup', methods =['POST'])
 def signup():
+    """Funcion para hacer un registro con los campos: name, email y password"""
     # creates a dictionary of the form data
     data = request.form
   
@@ -183,6 +187,7 @@ def signup():
 @app.route("/anime", methods=['GET'])
 @token_required
 def searchAnimeId(current_user):
+    """Funcion que regresa todos los animes almacenados en la base"""
     try:
         idAnime = int(request.args["anime-id"])
     except:
@@ -234,6 +239,7 @@ def searchAnimeId(current_user):
 @app.route("/anime/author/", methods=['GET'])
 @token_required
 def searchMangakaId(current_user):
+    """Funcion que regresa todos los animes del id de un author dado"""
     try:
         idAuthor = int(request.args["author-id"])
     except:
@@ -286,6 +292,7 @@ def searchMangakaId(current_user):
 @app.route("/search/anime/", methods=['GET'])
 @token_required
 def searchAnimeTitle(current_user):
+    """Funcion que regresa todos los animes que coincidan con el titulo dado"""
     title = request.args["title"]
     if len(title) == 0:
         return jsonify({"error": "El titulo no puede estar vacio"})
@@ -333,6 +340,7 @@ def searchAnimeTitle(current_user):
 @app.route("/anime/all", methods=["GET"])
 @token_required
 def allAnimes(current_user):
+    """Funcion que regresa todos los animes almacenados en la api"""
     cur = mysql.connection.cursor()
     cur.execute("""select A.id_anime as "Id",A.title as "Title",A.description as 
                 "Description",A.year as "Year",
@@ -376,6 +384,7 @@ def allAnimes(current_user):
 @app.route("/author/all/", methods=["GET"])
 @token_required
 def allAuthors(current_user):
+    """Funcion que regresa todos los autores registrados en la api"""
     cur = mysql.connection.cursor()
     cur.execute("""select * from authors order by authors.id_author asc""")
     allData = cur.fetchall()
@@ -390,17 +399,19 @@ def allAuthors(current_user):
 
 @app.route("/about")
 def anime():
+    """Funcion que muestra informacion sobre como usar la api y endpoins disponibles"""
     with open("aboutl.json", "r") as data:
         return jsonify(json.load(data))
 
 
 @app.errorhandler(404)
 def page_not_found(error):
- error = {
-     "Code": 404,
-     "Error": "Endpoint not found"
- }
- return jsonify(error)
+    """En caso de un error 404, retornar un json con un mensaje de error"""
+    error = {
+        "Code": 404,
+        "Error": "Endpoint not found"
+    }
+    return jsonify(error)
 
 if __name__ == "__main__":
     # setting debug to True enables hot reload
