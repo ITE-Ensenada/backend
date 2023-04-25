@@ -26,7 +26,7 @@ Un detallote es que aveces se cierra automaticamente despues de meter el psswrd 
 
 Esto en windows es:
 
-Task Manager > Services > Open Services
+> Task Manager > Services > Open Services
 
 Una vez aqui busca el proceso "MYSQL${numerodelpuertoasignado}", en mi caso es MYSQL72
 Anyway, puedes dar click en x proceso y presionar "m" en el teclado para que te lleve directamente hasta las M y buscar ahi
