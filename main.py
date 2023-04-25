@@ -1,11 +1,12 @@
+"""Este programa es una API que consulta datos generales de videojuegos"""
+from datetime import datetime, timedelta
+from functools import wraps
 from flask import Flask, request, jsonify, make_response
 from flask_sqlalchemy import SQLAlchemy
 import uuid  # for public id
 from werkzeug.security import generate_password_hash, check_password_hash
 # imports for PyJWT authentication
 import jwt
-from datetime import datetime, timedelta
-from functools import wraps
 
 # creates Flask object
 app = Flask(__name__)
@@ -20,17 +21,16 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
 db = SQLAlchemy(app)
 
 # Database ORMs
-
-
 class User(db.Model):
+    """Clase que accede a la tabla User en la database"""
     id = db.Column(db.Integer, primary_key=True)
     public_id = db.Column(db.String(50), unique=True)
     name = db.Column(db.String(100))
     email = db.Column(db.String(70), unique=True)
     password = db.Column(db.String(80))
 
-
 class Videogames(db.Model):
+    """Clase que accede a la tabla Videogames en la database"""
     id = db.Column(db.Integer, primary_key=True)
     videogame_id = db.Column(db.String(50), unique=True)
     name = db.Column(db.String(100))
@@ -38,8 +38,8 @@ class Videogames(db.Model):
     publisher = db.Column(db.String(80))
     release_year = db.Column(db.Integer)
 
-
 class Developers(db.Model):
+    """Clase que accede a la Developers Videogames en la database"""
     id = db.Column(db.Integer, primary_key=True)
     developer_id = db.Column(db.String(50), unique=True)
     name = db.Column(db.String(100))
@@ -47,8 +47,8 @@ class Developers(db.Model):
     ceo_name = db.Column(db.String(80))
     fundation_year = db.Column(db.Integer)
 
-
 class Publishers(db.Model):
+    """Clase que accede a la tabla Publishers en la database"""
     id = db.Column(db.Integer, primary_key=True)
     publisher_id = db.Column(db.String(50), unique=True)
     name = db.Column(db.String(100))
@@ -56,13 +56,15 @@ class Publishers(db.Model):
     ceo_name = db.Column(db.String(80))
     fundation_year = db.Column(db.Integer)
 
-
 #with app.app_context():
 #    db.create_all()
 # decorator for verifying the JWT
 
-
 def token_required(f):
+    """
+    Esta funcion es la que verificara si
+    se requiere token o no para acceder al endpoint 
+    """
     @wraps(f)
     def decorated(*args, **kwargs):
         token = None
@@ -95,10 +97,13 @@ def token_required(f):
 # User Database Route
 # this route sends back list of users
 
-
 @app.route('/user', methods=['GET'])
 @token_required
 def get_all_users(current_user):
+    """
+    Aqui toma la data del usuario, para poder
+    crear el token enseguida segun los datos de este
+    """
     # querying the database
     # for all the entries in it
     users = User.query.all()
@@ -118,9 +123,11 @@ def get_all_users(current_user):
 
 # route for logging user in
 
-
 @app.route('/login', methods=['POST'])
 def login():
+    """
+    Este es el login de nuestro API
+    """
     # creates dictionary of form data
     auth = request.form
 
@@ -160,9 +167,11 @@ def login():
 
 # signup route
 
-
 @app.route('/signup', methods=['POST'])
 def signup():
+    """
+    La funcion de ingreso al API
+    """
     # creates a dictionary of the form data
     data = request.form
 
@@ -192,10 +201,13 @@ def signup():
         return make_response('User already exists. Please Log in.', 202)
 ########################################################################
 
-
 @app.route('/videogames', methods=['GET'])
 @token_required
 def videogames(current_user):
+    """
+    La funcion obtendra y mostrara todos los datos
+    del videojuego
+    """
     games = Videogames.query.all()
     output = []
     for game in games:
@@ -208,10 +220,13 @@ def videogames(current_user):
         })
     return jsonify({'consulta': output})
 
-
 @app.route('/developers', methods=['GET'])
 @token_required
 def developers(current_user):
+    """
+    Esta funcion obtendra y mostrara la data de
+    los developers
+    """
     developers = Developers.query.all()
     output = []
     for developer in developers:
@@ -224,10 +239,12 @@ def developers(current_user):
         })
     return jsonify({'consulta': output})
 
-
 @app.route('/publishers', methods=['GET'])
 @token_required
 def publishers(current_user):
+    """
+    Esta funcion mostrra todo sobre los publishers
+    """
     publishers = Publishers.query.all()
     output = []
     for publisher in publishers:
@@ -239,7 +256,6 @@ def publishers(current_user):
             'fundation_year': publisher.fundation_year,
         })
     return jsonify({'consulta': output})
-
 
     ################################################################
 if __name__ == "__main__":
