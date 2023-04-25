@@ -54,16 +54,29 @@ No elabores minuciosamente la implementación.
 
 ## Instalación
 
-pip install virtualenv
+Los siguientes pasos son necesarios para la instalacion de la api Animeinfo.
 
-python -m venv venv
+El proyecto fue construido en python 3.8
 
-venv\Scripts\activate.bat
-    
+Instalar el modulo virtualenv
+
+    pip install virtualenv
+
+Crear el entorno virtual
+
+    python -m venv venv
+
+Activar el entorno virtual
+
+    venv\Scripts\activate.bat
+
+Instalar los requirements
+
     pip install -r requirements.txt
+
+Ejecutar flask
+
     flask --app main run
-    pip list
-    python3.8
 
 
 ## End poins API
