@@ -249,7 +249,7 @@ def awards():
 def concentrate():
     concentrates = Concentrate.query,all()
     data = {
-        [concentrate.__dict__ for concentrate in concentrates]
+        'concentrates': [concentrate.__dict__ for concentrate in concentrates]
     }
     return jsonify(data)
 
@@ -258,7 +258,7 @@ def concentrate():
 def creators():
     creators =  Creator.query.all()
     data = {
-        [creator.__dict__ for creator in creators]
+        'creators': [creator.__dict__ for creator in creators],
     }
     return jsonify(data)
 
@@ -267,7 +267,7 @@ def creators():
 def dispensary():
     dispensaries = Dispensary.query.all()
     data = {
-        [dispensary.__dict__ for dispensary in dispensaries]
+        'dispensaries': [dispensary.__dict__ for dispensary in dispensaries]
     }
     return jsonify(data)
 
@@ -276,7 +276,7 @@ def dispensary():
 def strain():
     strains = Strain.query.all()
     data = {
-        [strain.__dict__ for strain in strains]
+        'strains': [strain.__dict__ for strain in strains]
     }
     return jsonify(data)
 
