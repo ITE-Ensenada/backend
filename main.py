@@ -31,6 +31,7 @@ def home():
 
 # decorator for verifying the JWT
 def token_required(f):
+    """Funcion encargada de validar si un token es valido"""
     @wraps(f)
     def decorated(*args, **kwargs):
         token = None
