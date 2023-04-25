@@ -48,7 +48,8 @@ def log_access(func):
         mycursor.execute(
             'SELECT registerdate FROM users WHERE id = %s', (user_id,))
         register_date = mycursor.fetchone()
-        new_log = "INSERT INTO endpointlogs (useriID, endpoint, startTime, register_date) VALUES (%s, %s, %s, %s)"
+        new_log = "INSERT INTO endpointlogs (useriID, endpoint, startTime, register_date) " \
+            "VALUES (%s, %s, %s, %s)"
         add = (user_id, endpoint, start_time, register_date[0])
         mycursor.execute(new_log, add)
         connection.commit()
@@ -70,10 +71,11 @@ def welcome():
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
     """
-    Maneja el registro de un nuevo usuario mediante una solicitud POST que contiene un nombre de usuario y una contraseña.
-    Verifica si el nombre de usuario ya está en uso, si es así devuelve un mensaje de error.
-    Si el nombre de usuario no está en uso, guarda la información del usuario en la base de datos y 
-    redirige a la página de inicio de sesión.
+    Maneja el registro de un nuevo usuario mediante una solicitud POST 
+    que contiene un nombre de usuario y una contraseña. Verifica si 
+    el nombre de usuario ya está en uso, si es así devuelve un mensaje de error.
+    Si el nombre de usuario no está en uso, guarda la información del usuario 
+    en la base de datos y redirige a la página de inicio de sesión.
     """
     if request.method == 'POST':
         username = request.form['username']
@@ -101,9 +103,10 @@ def signup():
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     """
-    Maneja la autenticación de un usuario a través de credenciales de inicio de sesión proporcionadas a través de una solicitud POST.
-    Si las credenciales son válidas, se crea un token de acceso para el usuario y se registra una nueva sesión en la base de datos.
-    Si las credenciales son inválidas, se devuelve un mensaje de error.
+    Maneja la autenticación de un usuario a través de credenciales de inicio
+    de sesión proporcionadas a través de una solicitud POST. Si las credenciales 
+    son válidas, se crea un token de acceso para el usuario y se registra una nueva 
+    sesión en la base de datos. Si las credenciales son inválidas, se devuelve un mensaje de error.
     """
     if request.method == 'POST':
         username = request.form['username']
@@ -125,8 +128,8 @@ def login():
         user_agent = request.headers.get('User-Agent')
         user_agent_parsed = parse(user_agent)
         user_browser = user_agent_parsed.browser.family
-
-        new_session = "INSERT INTO sessions (userID, token, browser, os, createdAt, expiresAt) VALUES (%s, %s, %s,%s,%s,%s)"
+        new_session = "INSERT INTO sessions (userID, token, browser, os, createdAt, " \
+            "expiresAt) VALUES (%s, %s, %s,%s,%s,%s)"
         add = (user[0], token, user_browser,
                platform.system(), time, expire)
         mycursor.execute(new_session, add)
@@ -148,7 +151,10 @@ def login():
 @jwt_required()
 @log_access
 def get_jugadores():
-    """ Obtiene la lista de todos los jugadores de la Liga MX y devuelve la lista en formato JSON. """
+    """ 
+    Obtiene la lista de todos los jugadores de la Liga MX y 
+    devuelve la lista en formato JSON. 
+    """
     connection = mysql.connector.connect(**connectionDatabase)
     cursor = connection.cursor()
     cursor.execute("SELECT * FROM players")
@@ -163,7 +169,10 @@ def get_jugadores():
 
 @app.route('/ligamx/equipos')
 def get_equipos():
-    """ Obtiene la lista de todos los equipos de la Liga MX y devuelve la lista en formato JSON. """
+    """ 
+    Obtiene la lista de todos los equipos de la Liga MX y 
+    devuelve la lista en formato JSON. 
+    """
     connection = mysql.connector.connect(**connectionDatabase)
     cursor = connection.cursor()
     cursor.execute("SELECT * FROM teams")
@@ -178,11 +187,14 @@ def get_equipos():
 
 @app.route('/ligamx/goleadores')
 def get_goleadores():
-    """ Obtiene la lista de los 10 mejores goleadores de la Liga MX y devuelve la lista en formato JSON. """
+    """ 
+    Obtiene la lista de los 10 mejores goleadores de la Liga MX 
+    y devuelve la lista en formato JSON. 
+    """
     connection = mysql.connector.connect(**connectionDatabase)
     cursor = connection.cursor()
-    cursor.execute(
-        "SELECT id, name, lastName, team, goals FROM players ORDER BY goals DESC LIMIT 10")
+    cursor.execute("SELECT id, name, lastName, team, goals FROM players "
+                   "ORDER BY goals DESC LIMIT 10")
     headers = [x[0] for x in cursor.description]
     results = cursor.fetchall()
     connection.close()
@@ -194,7 +206,10 @@ def get_goleadores():
 
 @app.route('/ligamx/asistidores')
 def get_asistidores():
-    """ Obtiene la lista de los 10 mejores asistidores de la Liga MX y devuelve la lista en formato JSON. """
+    """ 
+    Obtiene la lista de los 10 mejores asistidores de la Liga MX 
+    y devuelve la lista en formato JSON. 
+    """
     connection = mysql.connector.connect(**connectionDatabase)
     cursor = connection.cursor()
     cursor.execute(
@@ -210,8 +225,10 @@ def get_asistidores():
 
 @app.route('/ligamx/campeonatos')
 def get_campeonatos():
-    """ Obtiene la lista de los equipos de la Liga MX ordenados por su cantidad de campeonatos
-    y devuelve la lista en formato JSON. """
+    """ 
+    Obtiene la lista de los equipos de la Liga MX ordenados 
+    por su cantidad de campeonatos y devuelve la lista en formato JSON.
+    """
     connection = mysql.connector.connect(**connectionDatabase)
     cursor = connection.cursor()
     cursor.execute(
@@ -227,8 +244,8 @@ def get_campeonatos():
 
 @app.route('/ligamx/jugadores/valorMercado')
 def get_valor_mercado():
-    """ Obtiene la lista de todos los jugadores de la Liga MX ordenados por su valor de transferencia
-    y devuelve la lista en formato JSON. """
+    """ Obtiene la lista de todos los jugadores de la Liga MX ordenados 
+    por su valor de transferencia y devuelve la lista en formato JSON. """
     connection = mysql.connector.connect(**connectionDatabase)
     cursor = connection.cursor()
     cursor.execute(
@@ -244,7 +261,10 @@ def get_valor_mercado():
 
 @app.route('/ligamx/jugadores/mexicanos')
 def get_mexicanos():
-    """ Obtiene la lista de todos los jugadores mexicanos de la Liga MX y devuelve la lista en formato JSON. """
+    """ 
+    Obtiene la lista de todos los jugadores mexicanos de la Liga MX
+    y devuelve la lista en formato JSON. 
+    """
     connection = mysql.connector.connect(**connectionDatabase)
     cursor = connection.cursor()
     cursor.execute(
