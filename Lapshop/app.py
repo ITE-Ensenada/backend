@@ -1,11 +1,14 @@
 """ Programa principal con login y endpoints """
-from flask import Flask, render_template, request, redirect, url_for, jsonify
-from flask_jwt_extended import jwt_required, JWTManager, get_jwt_identity, create_access_token, get_jwt
 import hashlib
-import mysql.connector
+import json
 from datetime import datetime, timedelta
 from functools import wraps
 import platform
+from flask import Flask, render_template, request, redirect, url_for, jsonify
+from flask_jwt_extended import jwt_required, JWTManager, get_jwt_identity
+from flask_jwt_extended import create_access_token, get_jwt
+import mysql.connector
+
 
 app = Flask(__name__)
 app.config['JWT_SECRET_KEY'] = 'super' #CAMBIAR ESTO!!!
@@ -13,7 +16,7 @@ app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(minutes = 5)
 
 jwt = JWTManager(app)
 
-# La base de datos que se uso fue la de MySQL WorkBench, 
+# La base de datos que se uso fue la de MySQL WorkBench,
 # para facilitar la comprobacion.
 connection_data = {
     'user': 'root',
@@ -23,9 +26,9 @@ connection_data = {
 }
 
 # Funcion para crear un nuevo registro (log)
-def log_access(f):
+def log_access(funct):
     """ Funcion para el login """
-    @wraps(f)
+    @wraps(funct)
     def create_log(*args, **kwargs):
         # Acceder al token
         token = get_jwt_identity()
@@ -36,12 +39,13 @@ def log_access(f):
         reg_date = datetime.strptime(claims["register_date"],'%Y-%m-%d %H:%M:%S')
         connection = mysql.connector.connect(**connection_data)
         mycursor = connection.cursor()
-        new_log_sql = "INSERT INTO endpoint_logs (user_id, endpoint, start_time, register_date) VALUES (%s, %s, %s, %s)" #Consulta para agregar el nuevo registro
+        new_log_sql = "INSERT INTO endpoint_logs (user_id, endpoint, start_time, register_date) \
+        VALUES (%s, %s, %s, %s)" #Consulta para agregar el nuevo registro
         val = (user_id, endpoint, timestamp, reg_date)
         mycursor.execute(new_log_sql, val) #Ejecutar
         connection.commit() #Guardar cambios
         connection.close() #Cerrar conexion
-        return f(*args, **kwargs) #Devolver la funcion original
+        return funct(*args, **kwargs) #Devolver la funcion original
     return create_log
 
 @app.route("/")
@@ -106,12 +110,13 @@ def login():
 
         time = datetime.now()
         expire = time + timedelta(minutes=5)
-        additional_claims = {"user": user[1], "expires_at": expire, "register_date": user[3].strftime('%Y-%m-%d %H:%M:%S')}
+        additional_claims = {"user": user[1], "expires_at": expire,\
+        "register_date": user[3].strftime('%Y-%m-%d %H:%M:%S')}
         #Crear token de sesión
         access_token = create_access_token(identity=user[0], additional_claims=additional_claims)
-        
         #Guardar la sesion en la base de datos
-        new_session_sql = "INSERT INTO sessions (user_id, token, browser, os, created_at, expires_at) VALUES (%s, %s, %s,%s,%s,%s)"
+        new_session_sql = "INSERT INTO sessions (user_id,token,browser,os,created_at,expires_at)\
+        VALUES (%s, %s, %s,%s,%s,%s)"
         val = (user[0], access_token, request.user_agent.string, platform.system(), time, expire)
         mycursor.execute(new_session_sql, val)
         connection.commit()
@@ -141,7 +146,7 @@ def terms():
 @app.route("/about")
 def about():
     """ Endpoint de Acerca de"""
-    with open("about.json") as archivo:
+    with open("about.json", mode="r", encoding="utf-8") as archivo:
         datos = json.load(archivo)
     return datos
 
