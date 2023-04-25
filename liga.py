@@ -1,12 +1,18 @@
+"""
+Este proyecto es una API hecha con Flask que maneja endpoints de registro de usuarios e inicio de sesion,
+ademas de usar JWT para autenticar a los usuarios y proporcionar un token de acceso. Esta API proporciona
+datos estadisticos de la Liga MX cargados previamente en una base de datos hecha en MySQL. 
+"""
+import hashlib
+import json
+import mysql.connector
+import platform
+from datetime import datetime, timedelta
+from functools import wraps
+
 from flask import Flask, render_template, request, redirect, url_for, jsonify
 from flask_jwt_extended import jwt_required, JWTManager, get_jwt_identity, create_access_token
-from datetime import datetime, timedelta
 from user_agents import parse
-from functools import wraps
-import platform
-import hashlib
-import mysql.connector
-import json
 
 app = Flask(__name__)
 app.config['JWT_SECRET_KEY'] = 'chuchogol'
@@ -24,6 +30,13 @@ connectionDatabase = {
 
 
 def log_access(f):
+    """
+    Decorador que registra el acceso de un usuario a un endpoint en la base de datos.
+    Este decorador registra la hora de acceso del usuario, el endpoint al que se accedió,
+    el ID de usuario y la fecha de registro del usuario. Los datos se almacenan en una tabla 
+    de registros de endpoint en la base de datos.
+    """
+
     @wraps(f)
     def createLog(*args, **kwargs):
         token = get_jwt_identity()
@@ -46,11 +59,22 @@ def log_access(f):
 
 @app.route('/')
 def welcome():
+    """
+    Renderiza la plantilla HTML "welcome.html" y la devuelve como respuesta HTTP.
+    La plantilla HTML "welcome.html" contiene un mensaje de bienvenida.
+    Este endpoint se utiliza como página de inicio de la aplicación web.
+    """
     return render_template('welcome.html')
 
 
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
+    """
+    Maneja el registro de un nuevo usuario mediante una solicitud POST que contiene un nombre de usuario y una contraseña.
+    Verifica si el nombre de usuario ya está en uso, si es así devuelve un mensaje de error.
+    Si el nombre de usuario no está en uso, guarda la información del usuario en la base de datos y 
+    redirige a la página de inicio de sesión.
+    """
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['passw'].encode('utf-8')
@@ -76,6 +100,11 @@ def signup():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+    """
+    Maneja la autenticación de un usuario a través de credenciales de inicio de sesión proporcionadas a través de una solicitud POST.
+    Si las credenciales son válidas, se crea un token de acceso para el usuario y se registra una nueva sesión en la base de datos.
+    Si las credenciales son inválidas, se devuelve un mensaje de error.
+    """
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['passw'].encode('utf-8')
@@ -119,6 +148,7 @@ def login():
 @jwt_required()
 @log_access
 def get_jugadores():
+    """ Obtiene la lista de todos los jugadores de la Liga MX y devuelve la lista en formato JSON. """
     connection = mysql.connector.connect(**connectionDatabase)
     cursor = connection.cursor()
     cursor.execute("SELECT * FROM players")
@@ -133,6 +163,7 @@ def get_jugadores():
 
 @app.route('/ligamx/equipos')
 def get_equipos():
+    """ Obtiene la lista de todos los equipos de la Liga MX y devuelve la lista en formato JSON. """
     connection = mysql.connector.connect(**connectionDatabase)
     cursor = connection.cursor()
     cursor.execute("SELECT * FROM teams")
@@ -147,6 +178,7 @@ def get_equipos():
 
 @app.route('/ligamx/goleadores')
 def get_goleadores():
+    """ Obtiene la lista de los 10 mejores goleadores de la Liga MX y devuelve la lista en formato JSON. """
     connection = mysql.connector.connect(**connectionDatabase)
     cursor = connection.cursor()
     cursor.execute(
@@ -162,6 +194,7 @@ def get_goleadores():
 
 @app.route('/ligamx/asistidores')
 def get_asistidores():
+    """ Obtiene la lista de los 10 mejores asistidores de la Liga MX y devuelve la lista en formato JSON. """
     connection = mysql.connector.connect(**connectionDatabase)
     cursor = connection.cursor()
     cursor.execute(
@@ -177,6 +210,8 @@ def get_asistidores():
 
 @app.route('/ligamx/campeonatos')
 def get_campeonatos():
+    """ Obtiene la lista de los equipos de la Liga MX ordenados por su cantidad de campeonatos
+    y devuelve la lista en formato JSON. """
     connection = mysql.connector.connect(**connectionDatabase)
     cursor = connection.cursor()
     cursor.execute(
@@ -192,6 +227,8 @@ def get_campeonatos():
 
 @app.route('/ligamx/jugadores/valorMercado')
 def get_valorMercado():
+    """ Obtiene la lista de todos los jugadores de la Liga MX ordenados por su valor de transferencia
+    y devuelve la lista en formato JSON. """
     connection = mysql.connector.connect(**connectionDatabase)
     cursor = connection.cursor()
     cursor.execute(
@@ -207,6 +244,7 @@ def get_valorMercado():
 
 @app.route('/ligamx/jugadores/mexicanos')
 def get_mexicanos():
+    """ Obtiene la lista de todos los jugadores mexicanos de la Liga MX y devuelve la lista en formato JSON. """
     connection = mysql.connector.connect(**connectionDatabase)
     cursor = connection.cursor()
     cursor.execute(
@@ -222,11 +260,13 @@ def get_mexicanos():
 
 @app.route("/bye")
 def adios():
+    """ Manda un mensaje en formato JSON con una despedida. """
     return jsonify(despedida="bye bye")
 
 
 @app.route("/about")
 def about():
+    """ Abre el archivo de liga.json devolviendo una lista de los endpoints de la Liga MX. """
     with open("liga.json") as archivo:
         datos = json.load(archivo)
     return datos
