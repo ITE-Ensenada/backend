@@ -1,15 +1,15 @@
 """
-Este proyecto es una API hecha con Flask que maneja endpoints de registro de usuarios e inicio de sesion,
-ademas de usar JWT para autenticar a los usuarios y proporcionar un token de acceso. Esta API proporciona
+Este proyecto es una API hecha con Flask que maneja endpoints de 
+registro de usuarios e inicio de sesion, ademas de usar JWT para 
+autenticar a los usuarios y proporcionar un token de acceso. Esta API proporciona
 datos estadisticos de la Liga MX cargados previamente en una base de datos hecha en MySQL. 
 """
 import hashlib
 import json
-import mysql.connector
-import platform
 from datetime import datetime, timedelta
+import platform
 from functools import wraps
-
+import mysql.connector
 from flask import Flask, render_template, request, redirect, url_for, jsonify
 from flask_jwt_extended import jwt_required, JWTManager, get_jwt_identity, create_access_token
 from user_agents import parse
@@ -29,7 +29,7 @@ connectionDatabase = {
 }
 
 
-def log_access(f):
+def log_access(func):
     """
     Decorador que registra el acceso de un usuario a un endpoint en la base de datos.
     Este decorador registra la hora de acceso del usuario, el endpoint al que se accedió,
@@ -37,24 +37,24 @@ def log_access(f):
     de registros de endpoint en la base de datos.
     """
 
-    @wraps(f)
-    def createLog(*args, **kwargs):
+    @wraps(func)
+    def create_log(*args, **kwargs):
         token = get_jwt_identity()
-        userID = token
+        user_id = token
         endpoint = request.endpoint
-        startTime = datetime.now()
+        start_time = datetime.now()
         connection = mysql.connector.connect(**connectionDatabase)
         mycursor = connection.cursor()
         mycursor.execute(
-            'SELECT registerdate FROM users WHERE id = %s', (userID,))
-        registerDate = mycursor.fetchone()
-        newLog = "INSERT INTO endpointlogs (useriID, endpoint, startTime, registerDate) VALUES (%s, %s, %s, %s)"
-        add = (userID, endpoint, startTime, registerDate[0])
-        mycursor.execute(newLog, add)
+            'SELECT registerdate FROM users WHERE id = %s', (user_id,))
+        register_date = mycursor.fetchone()
+        new_log = "INSERT INTO endpointlogs (useriID, endpoint, startTime, register_date) VALUES (%s, %s, %s, %s)"
+        add = (user_id, endpoint, start_time, register_date[0])
+        mycursor.execute(new_log, add)
         connection.commit()
         connection.close()
-        return f(*args, **kwargs)
-    return createLog
+        return func(*args, **kwargs)
+    return create_log
 
 
 @app.route('/')
@@ -86,10 +86,10 @@ def signup():
         if user:
             connection.close()
             return jsonify({'mensaje': 'El usuario ya existe'}), 400
-        passwordH = hashlib.sha256(password).hexdigest()
-        registerDate = datetime.now()
-        sql = "INSERT INTO users (username, password, registerDate) VALUES (%s, %s, %s)"
-        add = (username, passwordH, registerDate)
+        password_hash = hashlib.sha256(password).hexdigest()
+        register_date = datetime.now()
+        sql = "INSERT INTO users (username, password, register_date) VALUES (%s, %s, %s)"
+        add = (username, password_hash, register_date)
         cursor.execute(sql, add)
         connection.commit()
         connection.close()
@@ -126,10 +126,10 @@ def login():
         user_agent_parsed = parse(user_agent)
         user_browser = user_agent_parsed.browser.family
 
-        newSession = "INSERT INTO sessions (userID, token, browser, os, createdAt, expiresAt) VALUES (%s, %s, %s,%s,%s,%s)"
+        new_session = "INSERT INTO sessions (userID, token, browser, os, createdAt, expiresAt) VALUES (%s, %s, %s,%s,%s,%s)"
         add = (user[0], token, user_browser,
                platform.system(), time, expire)
-        mycursor.execute(newSession, add)
+        mycursor.execute(new_session, add)
         connection.commit()
         connection.close()
 
@@ -226,7 +226,7 @@ def get_campeonatos():
 
 
 @app.route('/ligamx/jugadores/valorMercado')
-def get_valorMercado():
+def get_valor_mercado():
     """ Obtiene la lista de todos los jugadores de la Liga MX ordenados por su valor de transferencia
     y devuelve la lista en formato JSON. """
     connection = mysql.connector.connect(**connectionDatabase)
@@ -267,7 +267,7 @@ def adios():
 @app.route("/about")
 def about():
     """ Abre el archivo de liga.json devolviendo una lista de los endpoints de la Liga MX. """
-    with open("liga.json") as archivo:
+    with open("liga.json", encoding='utf-8') as archivo:
         datos = json.load(archivo)
     return datos
 
