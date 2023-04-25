@@ -5,4 +5,4 @@ pip==22.3
 pipenv==2023.2.18
 PyJWT==2.6.0 
 flask_jwt_extended==4.4.4
-
+mysql -connector==8.0
