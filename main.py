@@ -220,7 +220,7 @@ def search_anime_id():
         data_anime = cur.fetchone()
         if data_anime is None:
             return jsonify({"error": "Anime not found"})
-        anime = {
+        information = {
             "id": data_anime[0],
             "title": data_anime[1],
             "description": data_anime[2],
@@ -232,7 +232,7 @@ def search_anime_id():
             "image": data_anime[8],
 
         }
-        return jsonify(anime)
+        return jsonify(information)
     return jsonify({"error": "An error occurred"})
 
 
@@ -273,7 +273,7 @@ def search_manga_id():
         data_anime = cur.fetchone()
         if data_anime is None:
             return jsonify({"error": "Anime not found"})
-        anime = {
+        animation = {
             "id": data_anime[0],
             "title": data_anime[1],
             "description": data_anime[2],
@@ -284,7 +284,7 @@ def search_manga_id():
             "rated": data_anime[7],
             "image": data_anime[8],
         }
-        return jsonify(anime)
+        return jsonify(animation)
     return jsonify({"error": "Ocurrió un error"})
 
 
@@ -320,20 +320,20 @@ def search_anime_title():
  
             WHERE A.title LIKE %s """, (title,))
     all_data = cur.fetchall()
-    all_animes = []
-    for anime in all_data:
-        all_animes.append({
-            "id": anime[0],
-            "title": anime[1],
-            "description": anime[2],
-            "year": anime[3],
-            "mangaka": anime[4],
-            "season": anime[5],
-            "gender": anime[6],
-            "rated": anime[7],
-            "image": anime[8],
+    data_info = []
+    for animation in all_data:
+        data_info.append({
+            "id": animation[0],
+            "title": animation[1],
+            "description": animation[2],
+            "year": animation[3],
+            "mangaka": animation[4],
+            "season": animation[5],
+            "gender": animation[6],
+            "rated": animation[7],
+            "image": animation[8],
         })
-    return jsonify(all_animes)
+    return jsonify(data_info)
 
 
 @app.route("/anime/all", methods=["GET"])
@@ -364,20 +364,20 @@ def all_animes():
     
     ORDER BY A.id_anime ASC""")
     all_data = cur.fetchall()
-    all_animes = []
-    for anime in all_data:
-        all_animes.append({
-            "id": anime[0],
-            "title": anime[1],
-            "description": anime[2],
-            "year": anime[3],
-            "mangaka": anime[4],
-            "season": anime[5],
-            "gender": anime[6],
-            "rated": anime[7],
-            "image": anime[8],
+    information_all = []
+    for temp_ani in all_data:
+        information_all.append({
+            "id": temp_ani[0],
+            "title": temp_ani[1],
+            "description": temp_ani[2],
+            "year": temp_ani[3],
+            "mangaka": temp_ani[4],
+            "season": temp_ani[5],
+            "gender": temp_ani[6],
+            "rated": temp_ani[7],
+            "image": temp_ani[8],
         })
-    return jsonify(all_animes)
+    return jsonify(information_all)
 
 
 @app.route("/author/all/", methods=["GET"])
@@ -387,13 +387,13 @@ def all_authors():
     cur = mysql.connection.cursor()
     cur.execute("""select * from authors order by authors.id_author asc""")
     all_data = cur.fetchall()
-    all_authors = []
+    mangakas_data = []
     for author in all_data:
-        all_authors.append({
+        mangakas_data.append({
             "id_author": author[0],
             "name": author[1],
         })
-    return jsonify(all_authors)
+    return jsonify(mangakas_data)
 
 
 @app.route("/about")
