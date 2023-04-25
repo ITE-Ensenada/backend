@@ -1,18 +1,16 @@
 """ Este es el codigo de Cannapi, una API Rest sobre cannabis"""
-# Flask
-from flask import Flask, jsonify, request, make_response
-from flask_sqlalchemy import SQLAlchemy
-# JWT
-import jwt
-# SQLITE3
-import sqlite3
-# Otros
-from  werkzeug.security import generate_password_hash, check_password_hash
 import uuid
 import json
 from datetime import datetime, timedelta
 from functools import wraps
 from user_agents import parse
+from flask import Flask, jsonify, request, make_response
+from flask_sqlalchemy import SQLAlchemy
+import jwt
+from  werkzeug.security import generate_password_hash, check_password_hash
+
+
+
 
 # Objeto de Flask
 app = Flask(__name__)
@@ -110,12 +108,12 @@ def get_user_info():
     }
 
 # Verificardor del JWT
-def token_required(f):
+def token_required(func):
     """
     Funcion que verifica el token dado en el header para hacer una
     consulta en la API
     """
-    @wraps(f)
+    @wraps(func)
     def decorated(*args, **kwargs):
         token = None
         # El jwt se obtiene del header
@@ -135,7 +133,7 @@ def token_required(f):
                 'message' : 'Token is invalid !!'
             }), 401
         # return del usuario
-        return  f(current_user, *args, **kwargs)
+        return  func(current_user, *args, **kwargs)
     return decorated
 
 @app.route("/")
@@ -177,7 +175,8 @@ def login():
         },
             app.config['SECRET_KEY'])
         return make_response(jsonify({'token' : token.decode('UTF-8')}), 201)
-    return make_response('Unable to verify', 403, {'WWW-Authenticate': 'Basic realm: "Authentication Failed "'})
+    return make_response('Unable to verify', 403,\
+        {'WWW-Authenticate': 'Basic realm: "Authentication Failed "'})
 
 #Register
 @app.route('/register', methods = ['POST'])
@@ -216,8 +215,8 @@ def auth():
 @app.route("/about")
 def about():
     """ Ruta que devuelve el JSON de la informacion de la API"""
-    f = open('cannapi.json')
-    display = json.load(f)
+    file = open('cannapi.json')
+    display = json.load(file)
     return jsonify(display)
 
 @app.route('/api', methods=['GET'])
