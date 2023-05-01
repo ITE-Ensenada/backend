@@ -1,15 +1,15 @@
 #!/usr/bin/python3
-import mysql.connector
+"""Api para la consulta de información relacionada al Anime"""
 import json
-from mysql.connector import Error
+import uuid  # for public id
+from datetime import datetime, timedelta
+from functools import wraps
+import mysql.connector
 from flask import Flask, render_template, request, jsonify, make_response
 from flask_mysqldb import MySQL
 from werkzeug.security import generate_password_hash, check_password_hash
 import jwt
-import uuid  # for public id
-from datetime import datetime, timedelta
 from ua_parser import user_agent_parser
-from functools import wraps
 
 
 app = Flask(__name__)
@@ -42,24 +42,30 @@ def token_required(variable_f):
         # return 401 if token is not passed
         if not token:
             return jsonify({'message': 'Token is missing !!'}), 401
-
         # decoding the payload to fetch the stored details
-        data = jwt.decode(
-            token, app.config['SECRET_KEY'], algorithms=['HS256'])
+        data = None
+        try:
+            data = jwt.decode(
+                token, app.config['SECRET_KEY'], algorithms=['HS256'])
+        except Exception:
+            return jsonify({'message': 'Token is missing !!'}), 401
         cur = mysql.connection.cursor()
-
-        t_public_id = data['public_id']
-        sql = "select * from users where public_id = %s "
-        cur.execute(sql, [t_public_id])
-        current_user = cur.fetchone()
-
+        t_public_id = None
+        current_user = None
+        try:
+            t_public_id = data['public_id']
+            sql = "select * from users where public_id = %s "
+            cur.execute(sql, [t_public_id])
+            current_user = cur.fetchone()
+        except Exception:
+            return jsonify({'message': 'missing public-id !!'}), 401
         if current_user is None:
             return jsonify({
                 'message': 'Token is invalid !!'
             }), 401
 
         # returns the current logged in users context to the routes
-        return variable_f(current_user, *args, **kwargs)
+        return variable_f(*args, **kwargs)
 
     return decorated
 
@@ -407,9 +413,6 @@ def page_not_found(error):
     }
     return jsonify(error)
 
-
 if __name__ == "__main__":
     # setting debug to True enables hot reload
-    # and also provides a debugger shell
-    # if you hit an error while running the server
     app.run(debug=True)
