@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <!-- Design by foolishdeveloper.com -->
-    <title>Glassmorphism login Form Tutorial in html css</title>
+    <title>Login</title>
 
     <link rel="preconnect" href="https://fonts.gstatic.com" />
     <link
@@ -50,7 +50,7 @@
         bottom: -80px;
       }
       form {
-        height: 520px;
+        height: 580px;
         width: 400px;
         background-color: rgba(255, 255, 255, 0.13);
         position: absolute;
@@ -130,6 +130,17 @@
       .social i {
         margin-right: 4px;
       }
+      button.signup {
+        margin-top: 15px;
+        background-color: transparent;
+        color: #fff;
+        border: 2px solid #fff;
+      }
+      .signup div {
+        width: 50px;
+        padding: 5px 10px 10px 5px;
+        text-align: center;
+      }
     </style>
   </head>
   <body>
@@ -137,11 +148,11 @@
       <div class="shape"></div>
       <div class="shape"></div>
     </div>
-    <form action="/login" method="POST">
-      <h3>Login</h3>
+    <form>
+      <h3>Login Here</h3>
 
       <label for="email">Email</label>
-      <input type="text" placeholder="Email or username" id="email" />
+      <input type="text" placeholder="Email or Username" id="email" />
 
       <label for="password">Password</label>
       <input type="password" placeholder="Password" id="password" />
@@ -150,6 +161,11 @@
       <div class="social">
         <div class="go"><i class="fab fa-google"></i> Google</div>
         <div class="fb"><i class="fab fa-facebook"></i> Facebook</div>
+      </div>
+      <div class="signup">
+        <button class="signup" onclick="location.href='signup.html'">
+          Sign Up
+        </button>
       </div>
     </form>
   </body>

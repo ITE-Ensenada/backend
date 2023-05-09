@@ -234,11 +234,13 @@ def login():
 
 
 # signup route
-@app.route('/signup', methods =['POST'])
+@app.route('/signup', methods =['GET','POST'])
 def signup():
     """
     Function to signup or create a user account
     """
+    if request.method == 'GET':
+        return render_template('auth/signup.html')
 	# creates a dictionary of the form data
     data = request.form
 
