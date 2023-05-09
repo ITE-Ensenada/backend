@@ -94,6 +94,10 @@ def token_required(f):
 
     return decorated
 
+@app.route('/')
+def index():
+    return "<h1><center>VGDb</center></h1>"
+
 # User Database Route
 # this route sends back list of users
 
