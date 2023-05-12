@@ -2,3 +2,4 @@ venv/
 venv
 VENV
 __pycache__
+.test.js.swp
